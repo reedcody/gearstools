@@ -79,6 +79,13 @@ Image.metadata.TM_Landsat_4_sr <- function(fname,decompressed_dir=tempdir(),retu
 	)
 	metadata$bbox <- st_sf(st_sfc(st_polygon(list(bbox_coords)),crs=metadata$proj))
 	
+	metadata$mask_file <- file.path(fname,fname_files_list[grepl(pattern="_pixel_qa.tif$",fname_files_list)])
+	
+	metadata$mask_function <- function(qa)
+	{
+		return(qa==66 | qa==130)
+	}
+	
 	# DUMP ALL RAW DATA HERE:
 	metadata$raw <- xml_raw
 	

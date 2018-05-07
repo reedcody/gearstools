@@ -30,7 +30,7 @@ ImageCollection.build <- function(fnames,drivers,decompressed_dirs,
 	{
 		if(verbose) message(paste0("Using foreach to process..."))
 		
-		ImageCollection$Images <- foreach(i=seq(nrow(fnames_df))) %dopar%
+		ImageCollection$Images <- foreach(i=seq(nrow(fnames_df)),.packages="GEARStools") %dopar%
 				{
 					ImageMetadata <- list()
 					ImageMetadata$metadata <- Image(

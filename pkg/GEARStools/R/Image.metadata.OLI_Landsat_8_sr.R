@@ -79,6 +79,13 @@ Image.metadata.OLI_Landsat_8_sr <- function(fname,decompressed_dir=tempdir(),ret
 	)
 	metadata$bbox <- st_sf(st_sfc(st_polygon(list(bbox_coords)),crs=metadata$proj))
 	
+	metadata$mask_file <- file.path(fname,fname_files_list[grepl(pattern="_pixel_qa.tif$",fname_files_list)])
+
+	metadata$mask_function <- function(qa)
+	{
+		return(qa==322 | qa==386 | qa==834 | qa==898 | qa==1346)
+	}
+	
 	# DUMP ALL RAW DATA HERE:
 	metadata$raw <- xml_raw
 	
