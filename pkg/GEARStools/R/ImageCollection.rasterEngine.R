@@ -1,0 +1,158 @@
+#' @export
+
+ImageCollection.rasterEngine <- function(
+		ImageCollection,
+		# rasterEngine stuff:
+		fun,args=NULL,
+		outdirectory,filesuffix, # Where to store files + suffix
+		chunk_format="data.frame",
+		blocksize=NULL, 
+		# Image stuff:
+		retrieve_stack,
+		RasterStacks_names,
+		overwrite=F,
+		# Filter stuff:
+		filterDate=NULL,filterDOY=NULL,filterMonths=NULL,
+		filterBounds=NULL,
+		filterImageNums=NULL,
+		filtered_ImageCollection_fname=tempfile(fileext=".Rdata"),
+		# Parallel options:
+		parallel_engine="rslurm",
+		rslurm_options=list(submit=FALSE),
+		job_folder=file.path(path.expand("~"),"rslurm"),
+		debugmode=F,verbose=F)
+{
+	# TODO: ... to filter and other...
+	
+	if(is.character(ImageCollection))
+	{
+		if(file.exists(ImageCollection)) load(ImageCollection) else stop("ImageCollection was not found...")
+	}
+	
+	if(!is.null(filterDate) || !is.null(filterDOY) || !is.null(filterMonths) || 
+			!is.null(filterBounds) || !is.null(filterImageNums))
+	{
+		# Filter the imagecollection
+		ImageCollection <- ImageCollection.filter(
+				ImageCollection=ImageCollection,
+				filterDate=filterDate,filterDOY=filterDOY,filterMonths=filterMonths,
+				filterBounds=filterBounds,
+#		filterRawMetadata,
+				filterImageNums=filterImageNums,
+				ImageCollection_fname=filtered_ImageCollection_fname)
+	}
+	
+	decompressed_dirs <- ImageCollection$buildparameters$decompressed_dirs
+	
+	# What to loop through:
+	rslurm_objects_file <- file.path(job_folder,paste("_rslurm_",rslurm_options$jobname,sep=""),"add_objects.RData")
+	
+	ImageCollection.rasterEngine_params <- data.frame(
+			fname=sapply(ImageCollection$Images,function(X) 
+					{ return(X$fname) } ),
+			driver=sapply(ImageCollection$Images,function(X) 
+					{ return(X$driver) } ),
+			rslurm_objects_file=rslurm_objects_file,
+			stringsAsFactors=F)
+	
+	print(nrow(ImageCollection.rasterEngine_params))
+	
+	# These will be loaded into the cluster:
+	ImageCollection.rasterEngine_params_objects <- c(
+			# rasterEngine stuff:
+			"fun","args","outdirectory","filesuffix","chunk_format","blocksize",
+			# Image stuff:
+			"decompressed_dirs","retrieve_stack","RasterStacks_names","overwrite",
+			# Other parameters:
+			"verbose"
+	)
+	
+	ImageCollection.rasterEngine_function <- function(
+			# Image parameters:
+			fname,driver,decompressed_dirs,
+			retrieve_stack,RasterStacks_names,
+			# rasterEngine parameters:
+			fun,args,
+			outdirectory,filesuffix, # Where to store files + suffix
+			chunk_format,blocksize, 
+			# Other parameters:
+			verbose,
+			rslurm_objects_file,
+			overwrite
+	)
+	{
+		print(rslurm_objects_file)
+		# Hack:
+		if(!missing(rslurm_objects_file)) { load(rslurm_objects_file) }
+		
+		# Create an image object:
+		Image_retrieved <- Image(
+				fname=fname,
+				driver=driver,
+				retrieve_metadata=F,
+				retrieve_stack = retrieve_stack,
+				decompressed_dir = decompressed_dirs, 
+				verbose=verbose, overwrite=overwrite
+		)
+		
+		# NEED TO FIX IMAGECOLLECTION TO CREATE BASENAMES:
+		Image_retrieved$metadata$basename <- sub('\\.tar.gz$', '',basename(Image_retrieved$metadata$fname))
+		
+		filename <- file.path(outdirectory,paste(Image_retrieved$metadata$basename,filesuffix,sep=""))
+		
+		if(!overwrite && file.exists(filename))
+		{
+			Image_rasterEngine <- brick(filename)			
+		} else
+		{
+			# Now apply function to this image:
+			Image_rasterEngine <- Image.rasterEngine(
+					Image=Image_retrieved,
+					fun=fun,
+					args=args,
+					chunk_format=chunk_format,
+					verbose=verbose,
+					output_fname=filename,
+					RasterStacks_names=RasterStacks_names,
+					blocksize=blocksize)
+		}
+		return(Image_rasterEngine)
+	}
+	
+	if(parallel_engine=="rslurm")
+	{
+		#	i=seq(nrow(fnames_df))
+		
+		# rslurm_params <- fnames_df
+		slurm_job_fname <- file.path(job_folder,paste("_rslurm_",rslurm_options$jobname,sep=""),"slurm_job.Rdata")
+	
+		if(file.exists(slurm_job_fname))
+		{
+			if(verbose) { message("Job was already created, attempting to collate it (assuming it completed)...") }
+			# load(slurm_job_fname)
+			# browser()
+			# NEED SOME ERROR CHECKING HERE:
+			ImageCollection$Images <- get_slurm_out(dirname(slurm_job_fname))
+		} else
+		{	
+			print(rslurm_options$scheduling_mode)
+			sjob <- slurm_apply(ImageCollection.rasterEngine_function, 
+					params=ImageCollection.rasterEngine_params,
+					add_objects=ImageCollection.rasterEngine_params_objects,
+					jobname = rslurm_options$jobname,
+					nodes = rslurm_options$nodes, cpus_per_node = 1, 
+					submit = rslurm_options$submit,rscript_path=rslurm_options$rscript_path,
+					slurm_options = rslurm_options$slurm_options,
+					scheduling_mode = rslurm_options$scheduling_mode)
+			
+			if(!rslurm_options$submit)
+			{
+				submit_job <- file.path(job_folder,paste("_rslurm_",rslurm_options$jobname,sep=""),"submit.sh")
+				message("Jobs are prepared and ready to be submitted. The most likely command is:")
+				message(paste("sbatch",submit_job))
+				message("ImageCollection will exit.  After execution is complete, please re-run this command with the same parameters...")
+				return(sjob)
+			}
+		}		
+	}	
+}

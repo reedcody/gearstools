@@ -1,0 +1,13 @@
+Package: GEARStools
+Maintainer: Jonathan Asher Greenberg <jgreenberg@unr.edu>
+License: GPL (>= 2)
+Title: GEARStools
+Type: Package
+LazyLoad: yes
+Author: Jonathan Asher Greenberg
+Description: Functions for the GEARS Lab at UNR
+Version: 0.7
+Date: 2018-01-31
+Depends:
+    R (>= 3.4.0)
+RoxygenNote: 6.0.1
