@@ -1,10 +1,11 @@
-#' @import foreach parallel
+#' @import foreach parallel doParallel
 #' @export
 
 ImageCollection.build <- function(fnames,drivers,decompressed_dirs,
 		# filterDate,
 		ImageCollection_fname=tempfile(fileext=".Rdata"),
 		parallel_engine="foreach",
+		foreach_options=list(type="PSOCK",spec=floor(detectCores()/2),methods=FALSE),
 		rslurm_options=list(submit=FALSE),buildonly,
 		job_folder=file.path(path.expand("~"),"rslurm"),
 		verbose=F)
@@ -29,6 +30,9 @@ ImageCollection.build <- function(fnames,drivers,decompressed_dirs,
 	if(parallel_engine=="foreach")
 	{
 		if(verbose) message(paste0("Using foreach to process..."))
+		cl <- makeCluster(spec=foreach_options$spec,type=foreach_options$type,methods=foreach_options$methods)
+		setDefaultCluster(cl=cl)
+		registerDoParallel(cl)
 		
 		ImageCollection$Images <- foreach(i=seq(nrow(fnames_df)),.packages="GEARStools") %dopar%
 				{
@@ -38,7 +42,10 @@ ImageCollection.build <- function(fnames,drivers,decompressed_dirs,
 							decompressed_dir=fnames_df[i,]$decompressed_dir,			
 							driver=fnames_df[i,]$driver)
 					return(ImageMetadata)
-				}	
+				}
+		
+		registerDoSEQ()
+		tryCatch(stopCluster(cl),error=function(e){})
 	}
 	
 # browser()

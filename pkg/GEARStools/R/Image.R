@@ -71,7 +71,6 @@ Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format
 	metadata$fname <- fname
 	metadata$fname_files_list <- fname_files_list
 	
-	
 	if(is.list(retrieve_stack))
 	{
 #		browser()
