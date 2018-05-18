@@ -6,8 +6,10 @@ ImageCollection.filter <- function(ImageCollection,
 		filterBounds,
 #		filterRawMetadata,
 		filterImageNums,
-		ImageCollection_fname=tempfile(fileext=".Rdata"))
+		ImageCollection_fname=tempfile(fileext=".Rdata"),
+		verbose=FALSE)
 {
+	# browser()
 	if(is.character(ImageCollection))
 	{
 		if(file.exists(ImageCollection)) load(ImageCollection) else stop("ImageCollection was not found...")
@@ -16,13 +18,18 @@ ImageCollection.filter <- function(ImageCollection,
 	
 	if(!missing(filterImageNums))
 	{
+		if(verbose) message("Filtering by image number...")
 		ImageCollection$Images <- ImageCollection$Images[filterImageNums]
 	} else filterImageNums=NULL
 	
 	# Datefilter:
 	# TODO: include low/upper bound?
-	if(!missing(filterDate))
+	# browser()
+	if(!missing(filterDate))	
 	{
+		if(verbose) message("Filtering by filterDate...")
+		
+		
 #		if(!is.Date(filterDate))
 #		{
 #			
@@ -30,7 +37,7 @@ ImageCollection.filter <- function(ImageCollection,
 		
 		ImageCollection$Images <- lapply(ImageCollection$Images,function(X,filterDate)
 				{
-					if(X$acquisition_datetime >= as.POSIXct(filterDate[1]) && X$acquisition_datetime < as.POSIXct(filterDate[2]))
+					if(X$metadata$acquisition_datetime >= as.POSIXct(filterDate[1]) && X$metadata$acquisition_datetime < as.POSIXct(filterDate[2]))
 					{
 						return(X)
 					} else
@@ -47,10 +54,12 @@ ImageCollection.filter <- function(ImageCollection,
 	# Day of year filter:
 	if(!missing(filterDOY))
 	{
+		if(verbose) message("Filtering by filterDOY...")
+		
 		ImageCollection$Images <- lapply(ImageCollection$Images,function(X,filterDOY)
 				{
 					#strftime(ImageCollection$Images[[1]]$acquisition_datetime,"%j")
-					acquisition_datetime_doy <- as.numeric(strftime(X$acquisition_datetime,"%j"))
+					acquisition_datetime_doy <- as.numeric(strftime(X$metadata$acquisition_datetime,"%j"))
 					
 					if(acquisition_datetime_doy %in% filterDOY)
 					{
@@ -69,10 +78,12 @@ ImageCollection.filter <- function(ImageCollection,
 	# Month filter:
 	if(!missing(filterMonths))
 	{
+		if(verbose) message("Filtering by filterMonths...")
+		
 		ImageCollection$Images <- lapply(ImageCollection$Images,function(X,filterMonths)
 				{
 					#strftime(ImageCollection$Images[[1]]$acquisition_datetime,"%j")
-					acquisition_datetime_month <- as.numeric(strftime(X$acquisition_datetime,"%m"))
+					acquisition_datetime_month <- as.numeric(strftime(X$metadata$acquisition_datetime,"%m"))
 					
 					if(acquisition_datetime_month %in% filterMonths)
 					{
@@ -88,8 +99,11 @@ ImageCollection.filter <- function(ImageCollection,
 		
 	} else filterMonths=NULL
 	
+	# browser()
 	if(!missing(filterBounds))
 	{
+		if(verbose) message("Filtering by filterBounds...")
+		
 #		ImageCollection$Images <- lapply(ImageCollection$Images,function(X,filterDOY)
 #				{
 		ImageCollection.sf <- ImageCollection.as.sf(ImageCollection)

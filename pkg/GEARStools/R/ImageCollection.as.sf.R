@@ -5,7 +5,7 @@ ImageCollection.as.sf <- function(ImageCollection,crs="+proj=latlong +datum=WGS8
 {
 	temp_bbox_list <- lapply(ImageCollection$Images,FUN=function(X)
 			{
-				temp_bbox <- X$bbox
+				temp_bbox <- X$metadata$bbox
 				temp_bbox_repro <- st_transform(temp_bbox,crs=crs)
 				return(temp_bbox_repro)	
 			})
