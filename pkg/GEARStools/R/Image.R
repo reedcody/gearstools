@@ -32,6 +32,8 @@ Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format
 		retrieve_stack <- retrieve_stack_shortcuts(retrieve_stack,driver)
 	}
 	
+	browser()
+	
 	# Check for compression, add other if need be.
 	if(grepl(pattern=".tar.gz$",x=fname))
 	{
@@ -109,7 +111,7 @@ Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format
 			{
 				stack_fnames_todecompress <- unlist(sapply(X=unlist(stack_fnames),FUN=function(X)
 								{
-									if(file.exists(file.path(outdir,X)))
+									if(!file.exists(file.path(outdir,X)))
 									{
 										return(X)
 									} else

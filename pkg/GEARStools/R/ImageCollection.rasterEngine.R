@@ -27,7 +27,6 @@ ImageCollection.rasterEngine <- function(
 		debugmode=F,verbose=F)
 {
 	# TODO: ... to filter and other...
-	browser()
 	
 	if(is.character(ImageCollection))
 	{
@@ -135,6 +134,9 @@ ImageCollection.rasterEngine <- function(
 		
 		ImageCollection.rasterEngine_params_objects_get <- lapply(ImageCollection.rasterEngine_params_objects,FUN=function(X) get(X))
 		names(ImageCollection.rasterEngine_params_objects_get) <- ImageCollection.rasterEngine_params_objects
+		
+		browser()
+		
 		
 		ids = batchMap(fun=ImageCollection.rasterEngine_function,
 				args=ImageCollection.rasterEngine_params,
