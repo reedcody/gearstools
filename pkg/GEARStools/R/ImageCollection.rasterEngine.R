@@ -148,7 +148,7 @@ ImageCollection.rasterEngine <- function(
 				args=ImageCollection.rasterEngine_params,
 				more.args=ImageCollection.rasterEngine_params_objects_get)
 		
-		ids[, chunk := chunk(job.id, chunk.size = batchtools_chunk.size)]
+		 # ids[, chunk := chunk(job.id, chunk.size = batchtools_chunk.size)]
 		
 		
 		submitJobs(ids=ids,resources = list(walltime = 7200, memory = 8192,ncpus=1,chunks.as.array.jobs = T))
