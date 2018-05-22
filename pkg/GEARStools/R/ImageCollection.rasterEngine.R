@@ -50,20 +50,6 @@ ImageCollection.rasterEngine <- function(
 	decompressed_dirs <- ImageCollection$buildparameters$decompressed_dirs
 	
 	
-	
-	# What to loop through:
-	rslurm_objects_file <- file.path(job_folder,paste("_rslurm_",rslurm_options$jobname,sep=""),"add_objects.RData")
-	
-	ImageCollection.rasterEngine_params <- data.frame(
-			fname=sapply(ImageCollection$Images,function(X) 
-					{ return(X$metadata$fname) } ),
-			driver=sapply(ImageCollection$Images,function(X) 
-					{ return(X$metadata$driver) } ),
-			rslurm_objects_file=rslurm_objects_file,
-			stringsAsFactors=F)
-	
-	# print(nrow(ImageCollection.rasterEngine_params))
-	
 	# These will be loaded into the cluster:
 	ImageCollection.rasterEngine_params_objects <- c(
 			# rasterEngine stuff:
@@ -160,6 +146,16 @@ ImageCollection.rasterEngine <- function(
 	
 	if(parallel_engine=="rslurm")
 	{
+		rslurm_objects_file <- file.path(job_folder,paste("_rslurm_",rslurm_options$jobname,sep=""),"add_objects.RData")
+		
+		ImageCollection.rasterEngine_params <- data.frame(
+				fname=sapply(ImageCollection$Images,function(X) 
+						{ return(X$metadata$fname) } ),
+				driver=sapply(ImageCollection$Images,function(X) 
+						{ return(X$metadata$driver) } ),
+				rslurm_objects_file=rslurm_objects_file,
+				stringsAsFactors=F)
+		
 		#	i=seq(nrow(fnames_df))
 		
 		# rslurm_params <- fnames_df
