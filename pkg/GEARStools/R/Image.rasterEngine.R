@@ -14,7 +14,7 @@ Image.rasterEngine <- function(Image,fun,args=NULL,
 #		names(Image$RasterStacks) <- RasterStacks_names
 #	}
 		
-	prediction <- rasterEngine(x=Image$RasterStacks,
+	prediction <- rasterEngine(newdata=Image$RasterStacks,
 			fun=fun,args=args,
 			filename=output_fname,
 			chunk_format=chunk_format,
