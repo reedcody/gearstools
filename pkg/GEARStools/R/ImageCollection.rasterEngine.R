@@ -22,6 +22,7 @@ ImageCollection.rasterEngine <- function(
 		job_folder=file.path(path.expand("~"),"rslurm"),
 		# Batchtools options:
 		batchtools_reg=NULL,
+		batchtools_chunk.size=1,
 #		batchtools_cluster.functions=NULL,
 		
 		debugmode=F,verbose=F)
@@ -141,6 +142,9 @@ ImageCollection.rasterEngine <- function(
 		ids = batchMap(fun=ImageCollection.rasterEngine_function,
 				args=ImageCollection.rasterEngine_params,
 				more.args=ImageCollection.rasterEngine_params_objects_get)
+		
+		ids[, chunk := chunk(job.id, chunk.size = batchtools_chunk.size)]
+		
 		
 		submitJobs(ids=ids,resources = list(walltime = 7200, memory = 8192,ncpus=1,chunks.as.array.jobs = T))
 		
