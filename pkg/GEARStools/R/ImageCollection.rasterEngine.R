@@ -56,7 +56,7 @@ ImageCollection.rasterEngine <- function(
 			"fun","args","outdirectory","filesuffix","chunk_format","blocksize",
 			# Image stuff:
 			"decompressed_dirs","retrieve_stack",
-			#	"RasterStacks_names",
+			"RasterStacks_names",
 			"overwrite",
 			# Other parameters:
 			"verbose"
