@@ -2,10 +2,10 @@
 #' @export
 
 ImageCollection.filter <- function(ImageCollection,
-		filterDate,filterDOY,filterMonths,
-		filterBounds,
+		filterDate=NULL,filterDOY=NULL,filterMonths=NULL,
+		filterBounds=NULL,
 #		filterRawMetadata,
-		filterImageNums,
+		filterImageNums=NULL,
 		ImageCollection_fname=tempfile(fileext=".Rdata"),
 		verbose=FALSE)
 {
@@ -16,7 +16,8 @@ ImageCollection.filter <- function(ImageCollection,
 	}
 	
 	
-	if(!missing(filterImageNums))
+	if(!is.null(filterImageNums))
+#	if(!missing(filterImageNums))
 	{
 		if(verbose) message("Filtering by image number...")
 		ImageCollection$Images <- ImageCollection$Images[filterImageNums]
@@ -25,7 +26,9 @@ ImageCollection.filter <- function(ImageCollection,
 	# Datefilter:
 	# TODO: include low/upper bound?
 	# browser()
-	if(!missing(filterDate))	
+	if(!is.null(filterDate))
+	
+#	if(!missing(filterDate))	
 	{
 		if(verbose) message("Filtering by filterDate...")
 		
@@ -52,7 +55,9 @@ ImageCollection.filter <- function(ImageCollection,
 	} else filterDate=NULL
 	
 	# Day of year filter:
-	if(!missing(filterDOY))
+	if(!is.null(filterDOY))
+	
+#	if(!missing(filterDOY))
 	{
 		if(verbose) message("Filtering by filterDOY...")
 		
@@ -76,7 +81,9 @@ ImageCollection.filter <- function(ImageCollection,
 	} else filterDOY=NULL
 	
 	# Month filter:
-	if(!missing(filterMonths))
+	if(!is.null(filterMonths))
+	
+#	if(!missing(filterMonths))
 	{
 		if(verbose) message("Filtering by filterMonths...")
 		
@@ -100,7 +107,9 @@ ImageCollection.filter <- function(ImageCollection,
 	} else filterMonths=NULL
 	
 	# browser()
-	if(!missing(filterBounds))
+	if(!is.null(filterBounds))
+	
+#	if(!missing(filterBounds))
 	{
 		if(verbose) message("Filtering by filterBounds...")
 		

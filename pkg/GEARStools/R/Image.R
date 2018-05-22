@@ -25,6 +25,12 @@ Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format
 		# driver = ...
 		#
 	}
+
+	# For shortcuts:
+	if(is.character(retrieve_stack))
+	{
+		retrieve_stack <- retrieve_stack_shortcuts(retrieve_stack,driver)
+	}
 	
 	# Check for compression, add other if need be.
 	if(grepl(pattern=".tar.gz$",x=fname))

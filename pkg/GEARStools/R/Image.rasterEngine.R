@@ -4,7 +4,7 @@
 Image.rasterEngine <- function(Image,fun,args=NULL,
 		output_fname,
 		chunk_format="data.frame",
-		RasterStacks_names,
+#		RasterStacks_names,
 		blocksize=NULL, 
 		debugmode=F,verbose=F)
 {
