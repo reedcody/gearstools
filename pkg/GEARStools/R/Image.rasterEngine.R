@@ -9,10 +9,10 @@ Image.rasterEngine <- function(Image,fun,args=NULL,
 		debugmode=F,verbose=F)
 {
 
-	if(!missing(RasterStacks_names))
-	{
-		names(Image$RasterStacks) <- RasterStacks_names
-	}
+#	if(!missing(RasterStacks_names))
+#	{
+#		names(Image$RasterStacks) <- RasterStacks_names
+#	}
 		
 	prediction <- rasterEngine(x=Image$RasterStacks,
 			fun=fun,args=args,
