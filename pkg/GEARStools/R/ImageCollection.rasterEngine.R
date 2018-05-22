@@ -9,7 +9,7 @@ ImageCollection.rasterEngine <- function(
 		blocksize=NULL, 
 		# Image stuff:
 		retrieve_stack,
-#		RasterStacks_names,
+		RasterStacks_names=NULL,
 		overwrite=F,
 		# Filter stuff:
 		filterDate=NULL,filterDOY=NULL,filterMonths=NULL,
@@ -65,7 +65,7 @@ ImageCollection.rasterEngine <- function(
 	ImageCollection.rasterEngine_function <- function(
 			# Image parameters:
 			fname,driver,decompressed_dirs,
-			retrieve_stack,#RasterStacks_names,
+			retrieve_stack,RasterStacks_names,
 			# rasterEngine parameters:
 			fun,args,
 			outdirectory,filesuffix, # Where to store files + suffix
@@ -95,6 +95,11 @@ ImageCollection.rasterEngine <- function(
 		# Image_retrieved$metadata$basename <- sub('\\.tar.gz$', '',basename(Image_retrieved$metadata$fname))
 		
 		filename <- file.path(outdirectory,paste(Image_retrieved$metadata$basename,filesuffix,sep=""))
+		
+		if(!is.null(RasterStacks_names))
+		{
+			names(Image_retrieved$RasterStacks) <- RasterStacks_names			
+		}
 		
 		if(!overwrite && file.exists(filename))
 		{
