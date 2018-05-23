@@ -1,14 +1,13 @@
 #' @export
 # Various pre-made rasterEngine functions
 
-predict.rfsrc.rasterEngine <- function(object,newdata,prob,ncores=1,verbose=F,...)
+predict.rfsrc.rasterEngine <- function(object,newdata,prob,ncores=1,verbose=T,...)
 {
 	require(randomForestSRC)
 	# For randomForestSRC, set rasterEngine to chunk_format="data.frame"
 #	if(nrow(newdata) > 2) browser()
 #	if(verbose) message(print(getOption("rf.cores")))
 #	browser()
-	
 	local_objects <- ls()
 	model_parameters <- setdiff(local_objects,c("newdata","object","prob","ncores","verbose"))
 	
@@ -27,11 +26,21 @@ predict.rfsrc.rasterEngine <- function(object,newdata,prob,ncores=1,verbose=F,..
 		}
 	}
 	
+	# seems to need the column name even if blank:
+	# bug in 3.6.0
+#	xvar.names <- object$xvar.names
+#	yvar.names <- object$yvar.names
+#	newdata <- cbind(newdata,0)
+#	names(newdata) <- c(xvar.names,yvar.names)
+	
 #	if(verbose) message(print(getOption("rf.cores")))
 	
 	# newdata_nrow <- nrow(newdata)
 	
 	# if(nrow(newdata) > 3) browser()
+
+	# Bug in newdata?
+	# newdata <- newdata * 1.0
 	
 	if(verbose) message("Checking for complete cases...")
 	# This could be sped up by removing incomplete cases...
@@ -124,9 +133,9 @@ predict.rfsrc.rasterEngine <- function(object,newdata,prob,ncores=1,verbose=F,..
 #	}
 #	predict_output <- as.data.frame(predict_output_matrix)
 	if(verbose) message(dim(predict_output))
+	if(verbose) message(summary(predict_output))
 	
 #	browser()
-	
 	
 	return(predict_output)
 }
