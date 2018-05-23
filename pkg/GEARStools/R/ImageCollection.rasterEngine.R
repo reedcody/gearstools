@@ -149,7 +149,7 @@ ImageCollection.rasterEngine <- function(
 				args=ImageCollection.rasterEngine_params,
 				more.args=ImageCollection.rasterEngine_params_objects_get)
 		
-		ids$chunk = chunk(ids$job.id, chunk.size = batchtools_chunk.size)
+		# ids$chunk = chunk(ids$job.id, chunk.size = batchtools_chunk.size)
 		 # ids[, chunk := chunk(job.id, chunk.size = batchtools_chunk.size)]
 		
 		
