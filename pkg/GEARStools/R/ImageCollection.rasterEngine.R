@@ -139,10 +139,10 @@ ImageCollection.rasterEngine <- function(
 						{ return(X$metadata$fname) } ),
 				driver=sapply(ImageCollection$Images,function(X) 
 						{ return(X$metadata$driver) } ),
-				outname <- sapply(ImageCollection$Images,function(X) 
+				outname=sapply(ImageCollection$Images,function(X) 
 						{ return(file.path(outdirectory,paste(X$metadata$basename,filesuffix,sep=""))) } ),
 				stringsAsFactors=F)
-		
+				
 		# add output filenames here:
 		# filename <- file.path(outdirectory,paste(Image_retrieved$metadata$basename,filesuffix,sep=""))
 	
