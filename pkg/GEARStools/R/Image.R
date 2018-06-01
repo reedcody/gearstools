@@ -4,7 +4,7 @@
 # stack_format: "RasterList", "vrt", GDALdrivers...
 
 Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format="RasterList",
-		decompressed_dir=tempdir(),overwrite=F,verbose=F)
+		decompressed_dir=tempdir(),metadata_additions=NULL,overwrite=F,verbose=F)
 {
 	if(!file.exists(fname))
 	{
