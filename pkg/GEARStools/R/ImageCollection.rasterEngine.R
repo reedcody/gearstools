@@ -53,7 +53,9 @@ ImageCollection.rasterEngine <- function(
 	# These will be loaded into the cluster:
 	ImageCollection.rasterEngine_params_objects <- c(
 			# rasterEngine stuff:
-			"fun","args","outdirectory","filesuffix","chunk_format","blocksize",
+			"fun","args",
+			# "outdirectory","filesuffix",
+			"chunk_format","blocksize",
 			# Image stuff:
 			"decompressed_dirs","retrieve_stack",
 			"RasterStacks_names",
