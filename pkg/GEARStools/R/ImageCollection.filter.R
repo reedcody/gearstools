@@ -24,7 +24,7 @@ ImageCollection.filter <- function(ImageCollection,
 	} else filterImageNums=NULL
 	
 	# Datefilter:
-	# TODO: include low/upper bound?
+	# TO DO: include low/upper bound?
 	# browser()
 	if(!is.null(filterDate))
 	
@@ -117,8 +117,12 @@ ImageCollection.filter <- function(ImageCollection,
 #				{
 		ImageCollection.sf <- ImageCollection.as.sf(ImageCollection)
 		filterBounds_repro <- st_transform(filterBounds,crs=st_crs(ImageCollection.sf))
-		intersect_check <- st_intersects(ImageCollection.sf,filterBounds_repro,sparse=F)
-		ImageCollection$Images <- ImageCollection$Images[intersect_check]
+		# intersect_check <- st_intersects(ImageCollection.sf,filterBounds_repro,sparse=F)
+		# ImageCollection$Images <- ImageCollection$Images[intersect_check]
+		intersect_check <- st_intersects(filterBounds_repro,ImageCollection.sf,sparse=F)
+		intersectIndices <- which(intersect_check, arr.ind = T)
+		scenesNeeded <- as.vector(base::unique(intersectIndices[,2]))
+		ImageCollection$Images <- ImageCollection$Images[scenesNeeded]
 		
 	} else filterBounds=NULL
 	
