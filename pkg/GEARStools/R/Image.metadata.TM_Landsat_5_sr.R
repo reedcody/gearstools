@@ -66,8 +66,8 @@ Image.metadata.TM_Landsat_5_sr <- function(fname,decompressed_dir=tempdir(),retu
 	ymin <- min(as.numeric(c(xml_raw$global_metadata$bounding_coordinates$north,
 							xml_raw$global_metadata$bounding_coordinates$south)))
 	
-	ymax <- min(as.numeric(c(xml_raw$global_metadata$bounding_coordinates$north,
-							xml_raw$global_metadata$bounding_coordinates$south)))
+	ymax <- max(as.numeric(c(xml_raw$global_metadata$bounding_coordinates$north,
+	                         xml_raw$global_metadata$bounding_coordinates$south)))
 	
 	bbox_coords <- matrix(c(
 					xmin,ymin,
