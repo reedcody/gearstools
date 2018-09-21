@@ -2,6 +2,7 @@
 #' @export
 
 # stack_format: "RasterList", "vrt", GDALdrivers...
+# retrieve_stack possible inputs? band list? "LANDSAT_SR" "LANDSAT_SR_NOMASK"?
 
 Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format="RasterList",
 		decompressed_dir=tempdir(),metadata_additions=NULL,overwrite=F,verbose=F)
