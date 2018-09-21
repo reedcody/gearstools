@@ -32,7 +32,9 @@ ImageCollection.build <- function(fnames,drivers,decompressed_dirs,
 		setDefaultCluster(cl=cl)
 		registerDoParallel(cl)
 		
-		ImageCollection$Images <- foreach(i=seq(nrow(fnames_df)),.packages="GEARStools") %dopar%
+		ImageCollection$Images <- foreach(i=seq(nrow(fnames_df))
+		                                  #,.packages="GEARStools"
+		                                  ) %do% #%dopar% can't use dopar without compiling GEARStools package
 				{
 					ImageMetadata <- list()
 					ImageMetadata$metadata <- Image(

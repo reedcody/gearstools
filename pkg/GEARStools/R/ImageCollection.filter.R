@@ -1,12 +1,12 @@
-#' @import foreach parallel rgeos rgdal
+#' @import foreach parallel rgeos rgdal lubridate
 #' @export
-#' @lubridate
+
 
 ImageCollection.filter <- function(ImageCollection,
 		filterDate.range=NULL,filterDOY=NULL,filterMonths=NULL,
 		filterDate.exact=NULL,
 		filterBounds=NULL,
-		filterRawMetadata = NULL,
+		filterCloudiness = NULL, # for filtering % cloud cover not cloud mask
 		filterImageNums=NULL,
 		ImageCollection_fname=tempfile(fileext=".Rdata"),
 		verbose=FALSE)
@@ -22,32 +22,42 @@ ImageCollection.filter <- function(ImageCollection,
 	{
 		if(verbose) message("Filtering by image number...")
 		ImageCollection$Images <- ImageCollection$Images[filterImageNums]
-	} else filterImageNums=NULL
+	} else {filterImageNums=NULL}
 
-	# Spatial Filters
-	if(!is.null(filterBounds))
-	  
-	  #	if(!missing(filterBounds))
-	{
-	  if(verbose) message("Filtering by filterBounds...")
-	  
-	  #		ImageCollection$Images <- lapply(ImageCollection$Images,function(X,filterDOY)
-	  #				{
-	  ImageCollection.sf <- ImageCollection.as.sf(ImageCollection)
-	  filterBounds_repro <- st_transform(filterBounds,crs=st_crs(ImageCollection.sf))
-	  intersect_check <- st_intersects(ImageCollection.sf,filterBounds_repro,sparse=F)
-	  ImageCollection$Images <- ImageCollection$Images[intersect_check]
-	  
-	} else filterBounds=NULL
+  #Filter by spatial data
+  if(!is.null(filterBounds))
+  {
+    if(verbose) {message("Filtering by filterBounds...")}
 
-# FILTER METADATA
+    ImageCollection.sf <- ImageCollection.as.sf(ImageCollection)
+    filterBounds_repro <- st_transform(filterBounds,crs=st_crs(ImageCollection.sf))
+    intersect_check <- st_intersects(filterBounds_repro,ImageCollection.sf,sparse=F)
+    intersectIndices <- which(intersect_check, arr.ind = T)
+    scenesNeeded <- as.vector(base::unique(intersectIndices[,2]))
+    ImageCollection$Images <- ImageCollection$Images[scenesNeeded]
+    
+  } else {filterBounds=NULL}
+
+  # FILTER CLOUDS
+  if(!is.null(filterCloudiness))
+  {
+    if(length(filterCloudiness)!=2 & !is.numeric(filterCloudiness)){
+      stop("Cloudiness parameter needs to be a numeric vector of length 2")
+    }
+    else{
+      if(verbose) message("Filtering by filterCloudiness...")
+      cloudiness_df <- foreach(i=seq(ImageCollection$Images),.combine=c) %do%
+      {
+        tempcloud <- as.numeric(ImageCollection$Images[[i]]$metadata$cloudiness)
+      }
+      index_cloudiness<-filterCloudiness[1] <= cloudiness_df & filterCloudiness[2] >= cloudiness_df
+      ImageCollection$Images<-ImageCollection$Images[index_cloudiness]
+    }
+  }
 			
 # TEMPORAL FILTERS
 	#Date Range
 	if(!is.null(filterDate.range))
-
-	
-#	if(!missing(filterDate.range))	
 	{
 		if(verbose) message("Filtering by filterDate.range...")
 		
@@ -65,12 +75,10 @@ ImageCollection.filter <- function(ImageCollection,
 		# Clean it by removing null entries:
 		ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images, is.null)]
 		
-	} else filterDate.range=NULL
+	} else {filterDate.range=NULL}
 	
 	# Day of year filter:
 	if(!is.null(filterDOY))
-	
-#	if(!missing(filterDOY))
 	{
 		if(verbose) message("Filtering by filterDOY...")
 		
@@ -91,12 +99,10 @@ ImageCollection.filter <- function(ImageCollection,
 		# Clean it by removing null entries:
 		ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images, is.null)]
 		
-	} else filterDOY=NULL
+	} else {filterDOY=NULL}
 	
 	# Month filter:
 	if(!is.null(filterMonths))
-	
-#	if(!missing(filterMonths))
 	{
 		if(verbose) message("Filtering by filterMonths...")
 		
@@ -115,9 +121,9 @@ ImageCollection.filter <- function(ImageCollection,
 				},filterMonths=filterMonths)
 		
 		# Clean it by removing null entries:
-ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images, is.null)]
+		ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images, is.null)]
 		
-	} else filterMonths=NULL
+	} else {filterMonths=NULL}
 	
 	# Filter by exact dates
 	if(!is.null(filterDate.exact))
@@ -137,36 +143,16 @@ ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images,
   index<-sapply(filterDate.exact, function (X) {which.min(abs(as.numeric(dates_df)-as.numeric(strftime(X, "%Y%m%d"))))})
   ImageCollection$Images<-ImageCollection$Images[index]
 		  }
-		}
-	  }
-	# Clean it by removing null entries:
-	ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images, is.null)]
-
-  #Filter by spatial data
-	if(!is.null(filterBounds))
-	
-#	if(!missing(filterBounds))
-	{
-		if(verbose) message("Filtering by filterBounds...")
-		
-#		ImageCollection$Images <- lapply(ImageCollection$Images,function(X,filterDOY)
-#				{
-		ImageCollection.sf <- ImageCollection.as.sf(ImageCollection)
-		filterBounds_repro <- st_transform(filterBounds,crs=st_crs(ImageCollection.sf))
-		# intersect_check <- st_intersects(ImageCollection.sf,filterBounds_repro,sparse=F)
-		# ImageCollection$Images <- ImageCollection$Images[intersect_check]
-		intersect_check <- st_intersects(filterBounds_repro,ImageCollection.sf,sparse=F)
-		intersectIndices <- which(intersect_check, arr.ind = T)
-		scenesNeeded <- as.vector(base::unique(intersectIndices[,2]))
-		ImageCollection$Images <- ImageCollection$Images[scenesNeeded]
-		
-	} else filterBounds=NULL
+		} 
+	  # Clean it by removing null entries:
+	  ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images, is.null)]
+	  } else {filterDate.exact=NULL}
 	
 # Filter Image Collection by parameters
 ImageCollection$filterparameters <- list(
   filterDate.range=filterDate.range,
   filterDOY=filterDOY,
-  filterDate.exact=filterDate.exact
+  filterDate.exact=filterDate.exact,
   filterMonths=filterMonths,
   filterBounds=filterBounds,
   filterImageNums=filterImageNums,
