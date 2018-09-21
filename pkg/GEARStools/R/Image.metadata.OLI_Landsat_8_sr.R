@@ -18,6 +18,9 @@ Image.metadata.OLI_Landsat_8_sr <- function(fname,decompressed_dir=tempdir(),ret
 		fname_files_list <- untar(fname,list=T)
 		xml_fname <- fname_files_list[grepl(pattern=".xml$",fname_files_list)]
 		xml_fname_uncompressed <- file.path(outdir,xml_fname)
+		txt_fname <- fname_files_list[grepl(pattern="_MTL.txt$",fname_files_list)]
+		txt_fname_uncompressed <- file.path(outdir,txt_fname)
+		
 		if(!file.exists(xml_fname_uncompressed)) 
 		{
 			suppressWarnings(untar(fname,xml_fname,exdir=outdir,extras=extras))
@@ -30,12 +33,26 @@ Image.metadata.OLI_Landsat_8_sr <- function(fname,decompressed_dir=tempdir(),ret
 		xml_fname_uncompressed <- file.path(fname,fname_files_list[grepl(pattern=".xml$",fname_files_list)])
 	}
 	
+	if(!file.exists(txt_fname_uncompressed))
+	{
+	  suppressWarnings(untar(fname,txt_fname,exdir=outdir,extras=extras))
+	}
+	
+} else
+{
+  compressed=FALSE
+  fname_files_list <- list.files(fname)
+  txt_fname_uncompressed <- file.path(fname,fname_files_list[grepl(pattern="_MTL.txt$",fname_files_list)])
+}
 	# Read band metadata from local file, this will need to be tweaked for a package:
 	# band_raw <- read.csv("~/code/R/GEARStools/pkg/GEARStools/inst/extdata/OLI_Landsat_8_bandinfo.csv")
 	#
 	if(verbose) { message("reading metadata...")}
 	
 	xml_raw <- readMeta(xml_fname_uncompressed,raw=T)
+	txt_raw <- readLines(txt_fname_uncompressed)
+	txt_raw<-grep(pattern="CLOUD_COVER =", txt_raw, ignore.case=T, value=T)
+	txt_raw<-as.numeric(gsub(pattern="CLOUD_COVER =", "" ,txt_raw, ignore.case = T))
 	
 	metadata <- list()
 	metadata$driver = driver
@@ -65,7 +82,7 @@ Image.metadata.OLI_Landsat_8_sr <- function(fname,decompressed_dir=tempdir(),ret
 	
 	ymin <- min(as.numeric(c(xml_raw$global_metadata$bounding_coordinates$north,
 							xml_raw$global_metadata$bounding_coordinates$south)))
-		
+
 	ymax <- max(as.numeric(c(xml_raw$global_metadata$bounding_coordinates$north,
 							xml_raw$global_metadata$bounding_coordinates$south)))
 	
@@ -81,6 +98,8 @@ Image.metadata.OLI_Landsat_8_sr <- function(fname,decompressed_dir=tempdir(),ret
 	
 	metadata$mask_file <- file.path(fname,fname_files_list[grepl(pattern="_pixel_qa.tif$",fname_files_list)])
 
+	metadata$cloudiness <- (txt_raw) #Percent cloudiness not cloud mask
+	
 	metadata$mask_function <- function(qa)
 	{
 		return(qa==322 | qa==386 | qa==834 | qa==898 | qa==1346)
