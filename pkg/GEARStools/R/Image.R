@@ -23,7 +23,7 @@ Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format
 	{
 		# AUTOMATED RECOGNITION UP HERE
 		# driver = ...
-		#
+		# Autmatically detect driver if not specified???
 	}
 
 	# For shortcuts:

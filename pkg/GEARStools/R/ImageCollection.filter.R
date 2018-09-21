@@ -1,10 +1,12 @@
 #' @import foreach parallel rgeos rgdal
 #' @export
+#' @lubridate
 
 ImageCollection.filter <- function(ImageCollection,
-		filterDate=NULL,filterDOY=NULL,filterMonths=NULL,
+		filterDate.range=NULL,filterDOY=NULL,filterMonths=NULL,
+		filterDate.exact=NULL,
 		filterBounds=NULL,
-#		filterRawMetadata,
+		filterRawMetadata = NULL,
 		filterImageNums=NULL,
 		ImageCollection_fname=tempfile(fileext=".Rdata"),
 		verbose=FALSE)
@@ -15,44 +17,55 @@ ImageCollection.filter <- function(ImageCollection,
 		if(file.exists(ImageCollection)) load(ImageCollection) else stop("ImageCollection was not found...")
 	}
 	
-	
 	if(!is.null(filterImageNums))
 #	if(!missing(filterImageNums))
 	{
 		if(verbose) message("Filtering by image number...")
 		ImageCollection$Images <- ImageCollection$Images[filterImageNums]
 	} else filterImageNums=NULL
-	
-	# Datefilter:
-	# TO DO: include low/upper bound?
-	# browser()
-	if(!is.null(filterDate))
-	
-#	if(!missing(filterDate))	
+
+	# Spatial Filters
+	if(!is.null(filterBounds))
+	  
+	  #	if(!missing(filterBounds))
 	{
-		if(verbose) message("Filtering by filterDate...")
+	  if(verbose) message("Filtering by filterBounds...")
+	  
+	  #		ImageCollection$Images <- lapply(ImageCollection$Images,function(X,filterDOY)
+	  #				{
+	  ImageCollection.sf <- ImageCollection.as.sf(ImageCollection)
+	  filterBounds_repro <- st_transform(filterBounds,crs=st_crs(ImageCollection.sf))
+	  intersect_check <- st_intersects(ImageCollection.sf,filterBounds_repro,sparse=F)
+	  ImageCollection$Images <- ImageCollection$Images[intersect_check]
+	  
+	} else filterBounds=NULL
+
+# FILTER METADATA
+			
+# TEMPORAL FILTERS
+	#Date Range
+	if(!is.null(filterDate.range))
+
+	
+#	if(!missing(filterDate.range))	
+	{
+		if(verbose) message("Filtering by filterDate.range...")
 		
-		
-#		if(!is.Date(filterDate))
-#		{
-#			
-#		}
-		
-		ImageCollection$Images <- lapply(ImageCollection$Images,function(X,filterDate)
+		ImageCollection$Images <- lapply(ImageCollection$Images,function(X,filterDate.range)
 				{
-					if(X$metadata$acquisition_datetime >= as.POSIXct(filterDate[1]) && X$metadata$acquisition_datetime < as.POSIXct(filterDate[2]))
+					if(X$metadata$acquisition_datetime >= as.POSIXct(filterDate.range[1]) && X$metadata$acquisition_datetime < as.POSIXct(filterDate.range[2]))
 					{
 						return(X)
 					} else
 					{
 						return(NULL)
 					}	
-				},filterDate=filterDate)
+				},filterDate.range=filterDate.range)
 		
 		# Clean it by removing null entries:
 		ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images, is.null)]
 		
-	} else filterDate=NULL
+	} else filterDate.range=NULL
 	
 	# Day of year filter:
 	if(!is.null(filterDOY))
@@ -102,11 +115,34 @@ ImageCollection.filter <- function(ImageCollection,
 				},filterMonths=filterMonths)
 		
 		# Clean it by removing null entries:
-		ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images, is.null)]
+ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images, is.null)]
 		
 	} else filterMonths=NULL
 	
-	# browser()
+	# Filter by exact dates
+	if(!is.null(filterDate.exact))
+	  {
+	  if(verbose) message("Filtering by filterDate.exact...")
+		if(!is.Date(filterDate.exact))
+	  		{
+		  filterDate.exact<-as_date(filterDate.exact)
+		  if(any(is.na(filterDate.exact))){
+		    stop("Dates are not formatted correctly. Please reformat as %Y%m%d")
+		    }
+		  else {
+	  dates_df <- foreach(i=seq(ImageCollection$Images),.combine=cbind) %do%
+	    {
+	      tempdate <- as.numeric(strftime(ImageCollection$Images[[i]]$metadata$acquisition_datetime,format="%Y%m%d"))
+	                             }
+  index<-sapply(filterDate.exact, function (X) {which.min(abs(as.numeric(dates_df)-as.numeric(strftime(X, "%Y%m%d"))))})
+  ImageCollection$Images<-ImageCollection$Images[index]
+		  }
+		}
+	  }
+	# Clean it by removing null entries:
+	ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images, is.null)]
+
+  #Filter by spatial data
 	if(!is.null(filterBounds))
 	
 #	if(!missing(filterBounds))
@@ -126,19 +162,26 @@ ImageCollection.filter <- function(ImageCollection,
 		
 	} else filterBounds=NULL
 	
-	ImageCollection$filterparameters <- list(
-			filterDate=filterDate,
-			filterDOY=filterDOY,
-			filterMonths=filterMonths,
-			filterBounds=filterBounds,
-			filterImageNums=filterImageNums,
-			ImageCollection_fname=ImageCollection_fname
-	)
-	ImageCollection$buildtime <- Sys.time()
-	save(ImageCollection,file=ImageCollection_fname)
-	return(ImageCollection)
-	
+# Filter Image Collection by parameters
+ImageCollection$filterparameters <- list(
+  filterDate.range=filterDate.range,
+  filterDOY=filterDOY,
+  filterDate.exact=filterDate.exact
+  filterMonths=filterMonths,
+  filterBounds=filterBounds,
+  filterImageNums=filterImageNums,
+  ImageCollection_fname=ImageCollection_fname
+)
+ImageCollection$buildtime <- Sys.time()
+save(ImageCollection,file=ImageCollection_fname)
+return(ImageCollection)
+
 }
+
+setwd("/Users/codyreed/Dropbox/Meadows GHG/Meadows Research/Remote Sensing/Image Collection Code")
+ImageCollection<-readRDS("TestImageCollection.Rdata")
+filterDate.exact<-c("1984-05-01", "1985-06-20", "1986-07-11", "1987-05-16", "1986-12-01")
+
 ##		filterDate = c(as.Date("2010-01-01"),as.Date("2012-01-01")),
 ##		filterBounds = 
 
