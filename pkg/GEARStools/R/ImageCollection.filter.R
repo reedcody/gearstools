@@ -41,11 +41,11 @@ ImageCollection.filter <- function(ImageCollection,
 	} else filterBounds=NULL
 
 # FILTER METADATA
-	
-		
+			
 # TEMPORAL FILTERS
 	#Date Range
 	if(!is.null(filterDate.range))
+
 	
 #	if(!missing(filterDate.range))	
 	{
@@ -141,8 +141,26 @@ ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images,
 	  }
 	# Clean it by removing null entries:
 	ImageCollection$Images <- ImageCollection$Images[!sapply(ImageCollection$Images, is.null)]
+
+  #Filter by spatial data
+	if(!is.null(filterBounds))
 	
-} else filterDate.range=NULL
+#	if(!missing(filterBounds))
+	{
+		if(verbose) message("Filtering by filterBounds...")
+		
+#		ImageCollection$Images <- lapply(ImageCollection$Images,function(X,filterDOY)
+#				{
+		ImageCollection.sf <- ImageCollection.as.sf(ImageCollection)
+		filterBounds_repro <- st_transform(filterBounds,crs=st_crs(ImageCollection.sf))
+		# intersect_check <- st_intersects(ImageCollection.sf,filterBounds_repro,sparse=F)
+		# ImageCollection$Images <- ImageCollection$Images[intersect_check]
+		intersect_check <- st_intersects(filterBounds_repro,ImageCollection.sf,sparse=F)
+		intersectIndices <- which(intersect_check, arr.ind = T)
+		scenesNeeded <- as.vector(base::unique(intersectIndices[,2]))
+		ImageCollection$Images <- ImageCollection$Images[scenesNeeded]
+		
+	} else filterBounds=NULL
 	
 # Filter Image Collection by parameters
 ImageCollection$filterparameters <- list(

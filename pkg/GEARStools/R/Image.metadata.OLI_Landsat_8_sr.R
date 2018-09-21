@@ -82,7 +82,7 @@ Image.metadata.OLI_Landsat_8_sr <- function(fname,decompressed_dir=tempdir(),ret
 	
 	ymin <- min(as.numeric(c(xml_raw$global_metadata$bounding_coordinates$north,
 							xml_raw$global_metadata$bounding_coordinates$south)))
-	
+
 	ymax <- max(as.numeric(c(xml_raw$global_metadata$bounding_coordinates$north,
 							xml_raw$global_metadata$bounding_coordinates$south)))
 	
