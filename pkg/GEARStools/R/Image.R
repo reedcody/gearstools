@@ -2,7 +2,6 @@
 #' @export
 
 # stack_format: "RasterList", "vrt", GDALdrivers...
-# retrieve_stack possible inputs? band list? "LANDSAT_SR" "LANDSAT_SR_NOMASK"?
 
 Image <- function(fname,driver="auto",retrieve_metadata=T,retrieve_stack=F,stack_format="RasterList",
 		decompressed_dir=tempdir(),metadata_additions=NULL,overwrite=F,verbose=F)
@@ -43,14 +42,18 @@ Image <- function(fname,driver="auto",retrieve_metadata=T,retrieve_stack=F,stack
 		fname_files_list <- untar(fname,list=T)
 		outdir <- file.path(decompressed_dir,sub('\\.tar.gz$', '',basename(fname)))
 		compressed=T
+		dir_for_metadata<-outdir
 	} else
 	{
 		if(file.info(fname,isdir))
 		{
 			fname_files_list <- list.files(fname)
+			dir_for_metadata<-fname
+			
 		} else
 		{
 			fname_files_list <- fname
+			dir_for_metadata<-dirname(fname)
 		}
 	}
 	
@@ -81,6 +84,7 @@ Image <- function(fname,driver="auto",retrieve_metadata=T,retrieve_stack=F,stack
 	
 	metadata$fname <- fname
 	metadata$fname_files_list <- fname_files_list
+	metadata$decompressed_dir<-dir_for_metadata
 	
 	if(is.list(retrieve_stack))
 	{
