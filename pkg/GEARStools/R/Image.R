@@ -20,15 +20,17 @@ Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format
 		extras=NULL
 	}
 	
-	if(driver=="")
+	if(driver==NULL)
 	{
-		# AUTOMATED RECOGNITION UP HERE
-		# driver = ...
-		# Autmatically detect driver if not specified???
+	  filename=basename(fname)
+	  if(grepl(pattern="^LT08", filename)){driver="OLI_Landsat_8_sr"}
+	  if(grepl(pattern="^LT07", filename)){driver="TM_Landsat_7_sr"}
+	  if(grepl(pattern="^LT05", filename)){driver="TM_Landsat_5_sr"}
+	  if(grepl(pattern="^LT04", filename)){driver="TM_Landsat_4_sr"}
 	}
 
 	# For shortcuts:
-	if(is.character(retrieve_stack))
+	if(is.character(retrieve_stack) || retrieve_stack==T)
 	{
 		retrieve_stack <- retrieve_stack_shortcuts(retrieve_stack,driver)
 	}
