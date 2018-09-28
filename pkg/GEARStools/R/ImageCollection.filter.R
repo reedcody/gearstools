@@ -164,9 +164,9 @@ return(ImageCollection)
 
 }
 
-setwd("/Users/codyreed/Dropbox/Meadows GHG/Meadows Research/Remote Sensing/Image Collection Code")
-ImageCollection<-readRDS("TestImageCollection.Rdata")
-filterDate.exact<-c("1984-05-01", "1985-06-20", "1986-07-11", "1987-05-16", "1986-12-01")
+# setwd("/Users/codyreed/Dropbox/Meadows GHG/Meadows Research/Remote Sensing/Image Collection Code")
+# ImageCollection<-readRDS("TestImageCollection.Rdata")
+# filterDate.exact<-c("1984-05-01", "1985-06-20", "1986-07-11", "1987-05-16", "1986-12-01")
 
 ##		filterDate = c(as.Date("2010-01-01"),as.Date("2012-01-01")),
 ##		filterBounds = 
