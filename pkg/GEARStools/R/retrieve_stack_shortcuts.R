@@ -2,7 +2,7 @@
 
 retrieve_stack_shortcuts <- function(retrieve_stack,driver)
 {
-	if(retrieve_stack=="LANDSAT_SR" || retrieve_stack=T) 
+	if(retrieve_stack=="LANDSAT_SR" || retrieve_stack==T) 
 	{
 		if(driver=="OLI_Landsat_8_sr")
 		{
