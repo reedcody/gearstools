@@ -4,7 +4,7 @@
 # stack_format: "RasterList", "vrt", GDALdrivers...
 # retrieve_stack possible inputs? band list? "LANDSAT_SR" "LANDSAT_SR_NOMASK"?
 
-Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format="RasterList",
+Image <- function(fname,driver="auto",retrieve_metadata=T,retrieve_stack=F,stack_format="RasterList",
 		decompressed_dir=tempdir(),metadata_additions=NULL,overwrite=F,verbose=F)
 {
 	if(!file.exists(fname))
@@ -20,7 +20,7 @@ Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format
 		extras=NULL
 	}
 	
-	if(driver==NULL)
+	if(driver=="auto")
 	{
 	  filename=basename(fname)
 	  if(grepl(pattern="^LT08", filename)){driver="OLI_Landsat_8_sr"}
