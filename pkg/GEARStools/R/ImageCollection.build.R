@@ -8,12 +8,21 @@ ImageCollection.build <- function(fnames,drivers,decompressed_dirs,
 		buildonly,
 		verbose=F)
 {
-	fnames_df <- foreach(i=seq(fnames),.combine=rbind) %do%
-			{
-				tempfiles <- list.files(fnames[i],full.names=T)
-				tempfnames <- data.frame(fname=tempfiles,driver=drivers[i],decompressed_dir=decompressed_dirs[i],
-						stringsAsFactors=F)
-			}
+  if(drivers=="auto"){
+    fnames_df <- foreach(i=seq(fnames),.combine=rbind) %do%
+    {
+      tempfiles <- list.files(fnames[i],full.names=T)
+      tempfnames <- data.frame(fname=tempfiles,driver=drivers,decompressed_dir=decompressed_dirs[i],
+                               stringsAsFactors=F)
+    }
+  } else {
+    fnames_df <- foreach(i=seq(fnames),.combine=rbind) %do%
+    {
+      tempfiles <- list.files(fnames[i],full.names=T)
+      tempfnames <- data.frame(fname=tempfiles,driver=drivers[i],decompressed_dir=decompressed_dirs[i],
+                               stringsAsFactors=F)
+    } 
+  }
 	
 	if(verbose) message(paste0("Number of files found:",nrow(fnames_df)))
 	
