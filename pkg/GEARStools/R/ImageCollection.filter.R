@@ -28,7 +28,7 @@ ImageCollection.filter <- function(ImageCollection,
   if(!is.null(filterBounds))
   {
     if(verbose) {message("Filtering by filterBounds...")}
-    if(is.character(filterBounds){
+    if(is.character(filterBounds)){
       if(file.exists(filterBounds)){
       filterBounds_read<-st_read(dsn=dirname(filterBounds), layer=gsub(c("\\.shp$","\\.kml$","\\.kmz$"),"",basename(filterBounds)))
       }}
