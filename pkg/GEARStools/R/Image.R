@@ -31,7 +31,9 @@ Image <- function(fname,driver="auto",retrieve_metadata=T,retrieve_stack=F,stack
 	# For shortcuts:
 	if(is.character(retrieve_stack) || retrieve_stack==T)
 	{
-		retrieve_stack <- retrieve_stack_shortcuts(retrieve_stack,driver)
+		retrieve_stack_internal <- retrieve_stack_shortcuts(retrieve_stack,driver)
+	} else {
+	  retrieve_stack_internal <- retrieve_stack
 	}
 	
 	# browser()
@@ -45,7 +47,7 @@ Image <- function(fname,driver="auto",retrieve_metadata=T,retrieve_stack=F,stack
 		dir_for_metadata<-outdir
 	} else
 	{
-		if(file.info(fname,isdir))
+		if(file.info(fname,isdir=T))
 		{
 			fname_files_list <- list.files(fname)
 			dir_for_metadata<-fname
@@ -86,7 +88,7 @@ Image <- function(fname,driver="auto",retrieve_metadata=T,retrieve_stack=F,stack
 	metadata$fname_files_list <- fname_files_list
 	metadata$decompressed_dir<-dir_for_metadata
 	
-	if(is.list(retrieve_stack))
+	if(is.list(retrieve_stack_internal))
 	{
 #		browser()
 		if(verbose) { message("retrieving stack...")}
@@ -102,7 +104,7 @@ Image <- function(fname,driver="auto",retrieve_metadata=T,retrieve_stack=F,stack
 							,x=x))
 		}
 		
-		stack_fnames <- lapply(retrieve_stack,FUN=match_fnames,x=fname_files_list)
+		stack_fnames <- lapply(retrieve_stack_internal,FUN=match_fnames,x=fname_files_list)
 		
 		if(compressed)
 		{

@@ -28,11 +28,12 @@ ImageCollection.filter <- function(ImageCollection,
   if(!is.null(filterBounds))
   {
     if(verbose) {message("Filtering by filterBounds...")}
-    if(is.character(filterBounds){
+    if(is.character(filterBounds)){
       if(file.exists(filterBounds)){
       filterBounds_read<-st_read(dsn=dirname(filterBounds), layer=gsub(c("\\.shp$","\\.kml$","\\.kmz$"),"",basename(filterBounds)))
       }}
     else{filterBounds_read=filterBounds}
+    
     ImageCollection.sf <- ImageCollection.as.sf(ImageCollection)
     filterBounds_repro <- st_transform(filterBounds_read,crs=st_crs(ImageCollection.sf))
     intersect_check <- st_intersects(filterBounds_repro,ImageCollection.sf,sparse=F)
