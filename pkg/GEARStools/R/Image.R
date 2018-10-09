@@ -22,8 +22,8 @@ Image <- function(fname,driver="auto",retrieve_metadata=T,retrieve_stack=F,stack
 	if(driver=="auto")
 	{
 	  filename=basename(fname)
-	  if(grepl(pattern="^LT08", filename)){driver="OLI_Landsat_8_sr"}
-	  if(grepl(pattern="^LT07", filename)){driver="TM_Landsat_7_sr"}
+	  if(grepl(pattern="^LC08", filename)){driver="OLI_Landsat_8_sr"}
+	  if(grepl(pattern="^LE07", filename)){driver="TM_Landsat_7_sr"}
 	  if(grepl(pattern="^LT05", filename)){driver="TM_Landsat_5_sr"}
 	  if(grepl(pattern="^LT04", filename)){driver="TM_Landsat_4_sr"}
 	}
