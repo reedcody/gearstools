@@ -31,8 +31,9 @@ ImageCollection.filter <- function(ImageCollection,
     if(is.character(filterBounds)){
       if(file.exists(filterBounds)){
       filterBounds_read<-st_read(dsn=dirname(filterBounds), layer=gsub("\\.shp$|\\.kml$|\\.kmz$","",basename(filterBounds))) 
-      }else{warning("Filter not found. File path to filter shapefile needed")}}
-    else{filterBounds_read=filterBounds}
+      }else{warning("filterBounds not found. File path shapefile or object of class 'sf' required")}}
+    else{if(class(filterBounds)[1]=="sf"){filterBounds_read <- filterBounds
+    }else{warning("filterBounds not found. File path shapefile or object of class 'sf' required")}}
     
     ImageCollection.sf <- ImageCollection.as.sf(ImageCollection)
     filterBounds_repro <- st_transform(filterBounds_read,crs=st_crs(ImageCollection.sf))
@@ -41,7 +42,7 @@ ImageCollection.filter <- function(ImageCollection,
     scenesNeeded <- as.vector(base::unique(intersectIndices[,2]))
     ImageCollection$Images <- ImageCollection$Images[scenesNeeded]
     
-  } else {filterBounds=NULL
+  } else {filterBounds <- NULL
     }
   
   
