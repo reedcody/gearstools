@@ -31,7 +31,7 @@ ImageCollection.filter <- function(ImageCollection,
     if(is.character(filterBounds)){
       if(file.exists(filterBounds)){
       filterBounds_read<-st_read(dsn=dirname(filterBounds), layer=gsub("\\.shp$|\\.kml$|\\.kmz$","",basename(filterBounds))) 
-      }}
+      }else{warning("Filter not found. File path to filter shapefile needed")}}
     else{filterBounds_read=filterBounds}
     
     ImageCollection.sf <- ImageCollection.as.sf(ImageCollection)
@@ -42,8 +42,7 @@ ImageCollection.filter <- function(ImageCollection,
     ImageCollection$Images <- ImageCollection$Images[scenesNeeded]
     
   } else {filterBounds=NULL
-  warning("Filter not found. File path to filter shapefile needed")
-  }
+    }
   
   
   # FILTER CLOUDS
