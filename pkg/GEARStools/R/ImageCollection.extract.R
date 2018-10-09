@@ -17,7 +17,7 @@ ImageCollection.extract <- function(ImageCollection,
                                     extract.sp = NULL, # default to filterBounds if NULL, can be file path or memory object
                                     extract.params = NULL, #list written as passed to extract  function (e.g. fun = mean, buffer = 30)
                                     extract.raster = NULL, # file path to raster
-                                    qa.mask = F,
+                                    qa.mask = F, # create "Mask" column in output dataframe indicating pixel clear (T/F) based on mask function from driver
                                     # Parallel options:
                                     parallel_engine = "rslurm",
                                     rslurm_options = list(submit = FALSE),
@@ -120,7 +120,7 @@ ImageCollection.extract <- function(ImageCollection,
       dfimage$driver <- tempimage$metadata$driver
       dfimage$basename <- tempimage$metadata$basename
       dfimage$acquisition_datetime <- tempimage$metadata$acquisition_datetime
-      dfimage$mask <- tempimage$metadata$mask_function(dfimage$qa) # based on mask function given by the driver - no clouds, no open water
+      if(qa.mask){dfimage$mask <- tempimage$metadata$mask_function(dfimage$qa)} # based on mask function given by the driver - no clouds, no open water
       return(dfimage)
     }
     
