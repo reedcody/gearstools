@@ -1,4 +1,4 @@
-#' @import spatial.tools raster plyr sf foreach
+#' @import spatial.tools raster plyr sf foreach sp gdalUtils
 #' @export
 
 ImageCollection.extract <- function(ImageCollection,
@@ -39,7 +39,9 @@ ImageCollection.extract <- function(ImageCollection,
       !is.null(filterMonths) ||
       !is.null(filterDate.exact) || 
       !is.null(filterCloudiness) || 
-      !is.null(filterImageNums)
+      !is.null(filterImageNums) ||
+      !is.null(extract.sp)||
+      !is.null(extract.raster)
       )
   {
     #### Filter stuff ####
@@ -64,7 +66,7 @@ ImageCollection.extract <- function(ImageCollection,
     }
     if (!is.null(extract.raster)) {
       extract.raster_read <- brick(extract.raster)
-      extract.raster_bbox <- bbox_to_SpatialPolygons(extract.raster_read)
+      extract.raster_bbox <- st_as_sf(bbox_to_SpatialPolygons(extract.raster_read))
       ImageCollection <- ImageCollection.filter(
         ImageCollection = ImageCollection,
         filterDate.range = filterDate.range,
@@ -131,92 +133,63 @@ ImageCollection.extract <- function(ImageCollection,
     write.csv(finaldf, file = outfile.name)
     return(finaldf)
   }
-  #foreach statement: foreach image in image collection read the bands or read the raster stack
-  #read in the bands or stack according to retrieve_stack information
-  #get name of decompressed_dir and get list of all files in directory
-  #Get the paths to each of the bands and the quality image.
-  # fnames <- dir(temporary_directory)
-  # B1 <- file.path(temporary_directory,fnames[grep("_sr_band2.tif",fnames)])
-  # B2 <- file.path(temporary_directory,fnames[grep("_sr_band3.tif",fnames)])
-  # B3 <- file.path(temporary_directory,fnames[grep("_sr_band4.tif",fnames)])
-  # B4 <- file.path(temporary_directory,fnames[grep("_sr_band5.tif",fnames)])
-  # B5 <- file.path(temporary_directory,fnames[grep("_sr_band6.tif",fnames)])
-  # B7 <- file.path(temporary_directory,fnames[grep("_sr_band7.tif",fnames)])
-  # qa <- file.path(temporary_directory,fnames[grep("_pixel_qa.tif",fnames)])
-  #
-  # initial_stack_fname <- paste(landsat_basename,"_initialstack.tif",sep="")
-  #
-  # gdalfile=c(B1,B2,B3,B4,B5,B7,qa)
-  #
-  # initial_landsatSR_stack <- mosaic_rasters(gdalfile=gdalfile,
-  #                                           dst_dataset=file.path(temporary_directory,initial_stack_fname),
-  #                                           output_Raster=T,separate=T)
-  #
-  # landsat_qa <- raster(mask_band)
-  # if(grep("OLI_Landsat_8", landsat_file)==1) { ##arreglar esto!!!
-  #   landsat_qa_mask <- (landsat_qa == 322) + (landsat_qa == 386)
-  # }else{
-  #   landsat_qa_mask <- (landsat_qa == 66) + (landsat_qa == 130)
-  # }
-  #
-  #   if(!is.null(extract.raster)){
-  #     #Load raster to extract
-  #     raster_to_extract<-raster(extract.raster)
-  #     #Create an extent object
-  #     boundary<-bbox_to_SpatialPolygons(raster_to_extract)
-  #
-  #     #Check that the files have the same projection
-  #     if(proj4string(initial_landsatSR_stack_masked)!=proj4string(boundary)) {
-  #
-  #       boundary<-spTransform(boundary, CRS(proj4string(initial_landsatSR_stack_masked)))
-  #     }
-  #
-  #     #Using the bbox of the resulting Veg_classes raster, subset the landsat image.
-  #     landsat_cropped_stack<-crop(initial_landsatSR_stack_masked, boundary)
-  #     #Save the cropped stack in the US_lifeform_cover project directory.
-  #     landsat_directory<-paste0(extract_directory_path,"/", gsub(c("^.{10}|.{6}T1-SC.*"), "", landsat_basename),"/",landsat_basename)
-  #     if(!(dir.exists(landsat_directory)))
-  #     {
-  #       dir.create(landsat_directory,showWarnings=TRUE,recursive=TRUE)
-  #     }
-  #     writeRaster(x=landsat_cropped_stack, filename=paste0(landsat_directory,"/","landsat_cropped_stack"), format="GTiff", overwrite=overwrite)
-  #
-  #     #Create a Mask layer for the vegetation classes
-  #     mask_veg<-calc(is.na(veg_classes)==TRUE, function(x){max(x)})
-  #     name_parts<-unlist(strsplit(veg_file, "/"))
-  #     output_file<-paste0(dirname(veg_file),"/",name_parts[10],"_veg_mask")
-  #     writeRaster(x=mask_veg, filename=output_file, format="GTiff", overwrite=overwrite)
-  #
-  #     #Creating temporal separate rasters from the veg_classes raster
-  #     for(i in seq(band_names)){
-  #       writeRaster(x=veg_classes[[i]], filename=paste0(temporary_directory,"/",name_parts[10],band_names[i]), format="GTiff", overwrite=overwrite)
-  #
-  #     }
-  #
-  #     #Wrap the vegetation classes raster to a 30 m pixel and align the vegetation classes to the landsat image
-  #     #Note: align_raster does not work with bricks, only with one band at a time, the same applies for gdalwarp.
-  #     vegetation_classes<-list()
-  #     for(i in seq(band_names)){
-  #       vegetation_classes[[i]]<-align_rasters(unaligned =paste0(temporary_directory,"/",name_parts[10],band_names[i],".tif") , reference =paste0(landsat_directory,"/","landsat_cropped_stack.tif"), dstfile = paste0(dirname(veg_file),"/",name_parts[10],"_",band_names[i], "_30.tif"),
-  #                                              output_Raster = T, r="average", overwrite=overwrite)
-  #
-  #     }
-  #
-  #     vegetation_classes[[length(band_names)+1]]<-align_rasters(unaligned =paste0(dirname(veg_file),"/",name_parts[10],"_veg_mask",".tif"), reference =paste0(landsat_directory,"/","landsat_cropped_stack.tif"), dstfile = paste0(dirname(veg_file),"/",name_parts[10], "_veg_mask_30.tif"),
-  #                                                               output_Raster = T, r="average", overwrite=overwrite)
-  #
-  #
-  #     veg_classes_30<-stack(vegetation_classes)
-  #     final_stack<-stack(veg_classes_30, landsat_cropped_stack)
-  #
-  #     dataset<-as.data.frame(final_stack)
-  #     dataset2<-na.omit(dataset)
-  #     colnames(dataset2)<-c(band_names,"mask", "band1", "band2", "band3", "band4", "band5", "band7")
-  #     final_dataset<-dataset2[dataset2$mask==0,]
-  #
-  #     write.csv(final_dataset[,c(1:4,6:11)], file=paste0(dirname(veg_file),"/",name_parts[10],"_final_dataset.csv"),row.names=FALSE)
-  #   }
-  #	  }
+ ####	Raster extraction ####
+  if (!is.null(extract.raster)) {
+    extract.raster_read <- brick(extract.raster)
+    datalist <- foreach(i = seq(length(ImageCollection$Images))) %do% {
+      #,.packages="GEARStools") %dopar% {  #change to %dopar% when GEARStools package loaded
+      tempimage <- Image(
+        fname = ImageCollection$Images[[i]]$metadata$fname,
+        driver = ImageCollection$Images[[i]]$metadata$driver,
+        retrieve_metadata = F,
+        retrieve_stack = retrieve_stack,
+        stack_format = "RasterList",
+        decompressed_dir = ImageCollection$Images[[i]]$metadata$decompressed_dir,
+        overwrite = overwrite,
+        verbose = verbose)
+      
+      boundary<-bbox_to_SpatialPolygons(extract.raster_read)
+      tempstack<-stack(tempimage[[1]])
+      if(proj4string(tempstack)!=proj4string(boundary)) {
+         boundary<-spTransform(boundary, CRS(proj4string(tempbrick)))
+         }
+      
+      cropped_stack<-crop(tempstack, boundary)
+      writeRaster(x=cropped_stack, filename=paste0(ImageCollection$Images[[i]]$metadata$decompressed_dir,"/","cropped_stack"), format="GTiff", overwrite=overwrite)
+     if(dim(extract.raster_read)[3]>1){
+       aligned_rasters<-list()
+       for(i in seq(dim(extract.raster_read)[3])){
+         writeRaster(x=extract.raster_read[[i]], filename=paste0(ImageCollection$Images[[i]]$metadata$decompressed_dir,"/",names(extract.raster_read)[i]), format="GTiff", overwrite=overwrite)
+          aligned_rasters[[i]]<-align_rasters(unaligned=paste0(ImageCollection$Images[[i]]$metadata$decompressed_dir,"/",names(extract.raster_read)[i],".tif"), 
+                                              reference =paste0(ImageCollection$Images[[i]]$metadata$decompressed_dir,"/","cropped_stack.tif"), 
+                                              dstfile =paste0(ImageCollection$Images[[i]]$metadata$decompressed_dir,"/",names(extract.raster_read)[i], "_aligned.tif"),
+                                                   output_Raster= T, r="average", overwrite=overwrite)
+                }
+       
+       aligned_rasters<-stack(aligned_rasters)
+       tempdata<-stack(aligned_rasters, cropped_stack)
+     }else{
+       aligned_raster<-align_rasters(unaligned=extract.raster_read, reference =paste0(ImageCollection$Images[[i]]$metadata$decompressed_dir,"/","cropped_stack.tif"), 
+                                     dstfile =paste0(ImageCollection$Images[[i]]$metadata$decompressed_dir,"/",names(extract.raster_read), "_aligned.tif"), output_Raster= T, 
+                                     r="average", overwrite=overwrite)
+      tempdata<-stack(aligned_raster, cropped_stack)
+         }
+     
+     dfimage <- as.data.frame(tempdata) #check how to go from raster to data frame keeping the pixel coordinates.
+     dfimage$driver <- tempimage$metadata$driver
+     dfimage$basename <- tempimage$metadata$basename
+     dfimage$acquisition_datetime <- tempimage$metadata$acquisition_datetime
+     dfimage$mask <- tempimage$metadata$mask_function(dfimage$qa) # based on mask function given by the driver - no clouds, no open water
+      return(dfimage)
+    }
+    
+    finaldf <- foreach(i = seq(datalist), .combine = rbind) %do%
+    {
+      df.all <- datalist[[i]]
+    }
+    write.csv(finaldf, file = outfile.name)
+    return(finaldf)
+  }
   #### Parallel Processing ####
   #	  if ....
   #
