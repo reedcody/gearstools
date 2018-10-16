@@ -169,7 +169,7 @@ ImageCollection.extract <- function(ImageCollection,
        aligned_rasters<-stack(aligned_rasters)
        tempdata<-stack(aligned_rasters, cropped_stack)
      }else{
-       aligned_raster<-align_rasters(unaligned=extract.raster_read, reference =paste0(ImageCollection$Images[[i]]$metadata$decompressed_dir,"/","cropped_stack.tif"), 
+       aligned_raster<-align_rasters(unaligned=extract.raster, reference =paste0(ImageCollection$Images[[i]]$metadata$decompressed_dir,"/","cropped_stack.tif"), 
                                      dstfile =paste0(ImageCollection$Images[[i]]$metadata$decompressed_dir,"/",names(extract.raster_read), "_aligned.tif"), output_Raster= T, 
                                      r="average", overwrite=overwrite)
       tempdata<-stack(aligned_raster, cropped_stack)
