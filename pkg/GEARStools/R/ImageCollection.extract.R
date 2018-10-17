@@ -86,7 +86,7 @@ ImageCollection.extract <- function(ImageCollection,
     if (is.character(extract.sp)) {
       if (file.exists(extract.sp)) {
         extract.sp_read <- st_read(dsn = dirname(extract.sp),
-                                   layer = gsub("\\.shp$|\\.kml$|\\.kmz$","",
+                                   layer = gsub("\\.shp$","",
                                                 basename(extract.sp)))
       }
     } else{
