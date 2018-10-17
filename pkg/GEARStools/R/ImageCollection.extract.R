@@ -19,10 +19,10 @@ ImageCollection.extract <- function(ImageCollection,
                                     extract.raster = NULL, # file path to raster
                                     qa.mask = F, # create "Mask" column in output dataframe indicating pixel clear (T/F) based on mask function from driver
                                     # Parallel options:
-                                    parallel_engine = "rslurm",
-                                    rslurm_options = list(submit = FALSE),
-                                    job_folder = file.path(path.expand("~"), "rslurm"),
-                                    debugmode = F,
+                                    #parallel_engine = "rslurm",
+                                    #rslurm_options = list(submit = FALSE),
+                                    #job_folder = file.path(path.expand("~"), "rslurm"),
+                                    #debugmode = F,
                                     verbose = F)
 {
   if (is.character(ImageCollection))
