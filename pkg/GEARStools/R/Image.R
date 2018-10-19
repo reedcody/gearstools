@@ -47,7 +47,7 @@ Image <- function(fname,driver="auto",retrieve_metadata=T,retrieve_stack=F,stack
 		dir_for_metadata<-outdir
 	} else
 	{
-		if(file.info(fname,isdir=T))
+		if(file.info(fname)$isdir)
 		{
 			fname_files_list <- list.files(fname)
 			dir_for_metadata<-fname
