@@ -2,12 +2,12 @@
 
 retrieve_stack_shortcuts <- function(retrieve_stack,driver)
 {
-	if(retrieve_stack=="LANDSAT_SR")
+	if(retrieve_stack=="LANDSAT_SR" || retrieve_stack==T) 
 	{
 		if(driver=="OLI_Landsat_8_sr")
 		{
 			# sensors
-			retrieve_stack = list(
+			retrieve_stack_return = list(
 					sr=c(
 							B1="_sr_band2.tif$",
 							B2="_sr_band3.tif$",
@@ -19,7 +19,7 @@ retrieve_stack_shortcuts <- function(retrieve_stack,driver)
 		} 
 		if(driver=="ETM_Landsat_7_sr" || driver=="TM_Landsat_5_sr" || driver=="TM_Landsat_4_sr")	
 		{
-			retrieve_stack = list(
+			retrieve_stack_return = list(
 					sr=c(
 							B1="_sr_band1.tif$",
 							B2="_sr_band2.tif$",
@@ -36,7 +36,7 @@ retrieve_stack_shortcuts <- function(retrieve_stack,driver)
 		if(driver=="OLI_Landsat_8_sr")
 		{
 			# sensors
-			retrieve_stack = list(
+			retrieve_stack_return = list(
 					sr=c(
 							B1="_sr_band2.tif$",
 							B2="_sr_band3.tif$",
@@ -48,7 +48,7 @@ retrieve_stack_shortcuts <- function(retrieve_stack,driver)
 		} 
 		if(driver=="ETM_Landsat_7_sr" || driver=="TM_Landsat_5_sr" || driver=="TM_Landsat_4_sr")	
 		{
-			retrieve_stack = list(
+			retrieve_stack_return = list(
 					sr=c(
 							B1="_sr_band1.tif$",
 							B2="_sr_band2.tif$",
@@ -62,5 +62,5 @@ retrieve_stack_shortcuts <- function(retrieve_stack,driver)
 	
 	
 	
-	return(retrieve_stack)
+	return(retrieve_stack_return)
 }

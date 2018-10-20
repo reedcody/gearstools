@@ -3,7 +3,7 @@
 
 # stack_format: "RasterList", "vrt", GDALdrivers...
 
-Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format="RasterList",
+Image <- function(fname,driver="auto",retrieve_metadata=T,retrieve_stack=F,stack_format="RasterList",
 		decompressed_dir=tempdir(),metadata_additions=NULL,overwrite=F,verbose=F)
 {
 	if(!file.exists(fname))
@@ -19,17 +19,21 @@ Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format
 		extras=NULL
 	}
 	
-	if(driver=="")
+	if(driver=="auto")
 	{
-		# AUTOMATED RECOGNITION UP HERE
-		# driver = ...
-		#
+	  filename=basename(fname)
+	  if(grepl(pattern="^LC08", filename)){driver="OLI_Landsat_8_sr"}
+	  if(grepl(pattern="^LE07", filename)){driver="TM_Landsat_7_sr"}
+	  if(grepl(pattern="^LT05", filename)){driver="TM_Landsat_5_sr"}
+	  if(grepl(pattern="^LT04", filename)){driver="TM_Landsat_4_sr"}
 	}
 
 	# For shortcuts:
-	if(is.character(retrieve_stack))
+	if(is.character(retrieve_stack) || retrieve_stack==T)
 	{
-		retrieve_stack <- retrieve_stack_shortcuts(retrieve_stack,driver)
+		retrieve_stack_internal <- retrieve_stack_shortcuts(retrieve_stack,driver)
+	} else {
+	  retrieve_stack_internal <- retrieve_stack
 	}
 	
 	# browser()
@@ -40,14 +44,18 @@ Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format
 		fname_files_list <- untar(fname,list=T)
 		outdir <- file.path(decompressed_dir,sub('\\.tar.gz$', '',basename(fname)))
 		compressed=T
+		dir_for_metadata<-outdir
 	} else
 	{
-		if(file.info(fname,isdir))
+		if(file.info(fname)$isdir)
 		{
 			fname_files_list <- list.files(fname)
+			dir_for_metadata<-fname
+			
 		} else
 		{
 			fname_files_list <- fname
+			dir_for_metadata<-dirname(fname)
 		}
 	}
 	
@@ -78,8 +86,9 @@ Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format
 	
 	metadata$fname <- fname
 	metadata$fname_files_list <- fname_files_list
+	metadata$decompressed_dir<-dir_for_metadata
 	
-	if(is.list(retrieve_stack))
+	if(is.list(retrieve_stack_internal))
 	{
 #		browser()
 		if(verbose) { message("retrieving stack...")}
@@ -95,7 +104,7 @@ Image <- function(fname,driver,retrieve_metadata=T,retrieve_stack=F,stack_format
 							,x=x))
 		}
 		
-		stack_fnames <- lapply(retrieve_stack,FUN=match_fnames,x=fname_files_list)
+		stack_fnames <- lapply(retrieve_stack_internal,FUN=match_fnames,x=fname_files_list)
 		
 		if(compressed)
 		{
