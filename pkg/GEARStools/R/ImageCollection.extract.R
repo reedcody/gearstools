@@ -15,7 +15,6 @@ ImageCollection.extract <- function(ImageCollection,
                                     retrieve_stack = T, # or list of band names
                                     overwrite = F,
                                     extract.sp = NULL, # default to filterBounds if NULL, can be file path or memory object
-                                    extract.params = NULL, #list written as passed to extract  function (e.g. fun = mean, buffer = 30)
                                     extract.raster = NULL, # file path to raster
                                     qa.mask = F, # create "Mask" column in output dataframe indicating pixel clear (T/F) based on mask function from driver
                                     # Parallel options:
@@ -23,7 +22,9 @@ ImageCollection.extract <- function(ImageCollection,
                                     #rslurm_options = list(submit = FALSE),
                                     #job_folder = file.path(path.expand("~"), "rslurm"),
                                     #debugmode = F,
-                                    verbose = F)
+                                    verbose = F,
+                                    ... # additional arguments to pass to extract()
+                                    )
 {
   if (is.character(ImageCollection))
   {
@@ -105,15 +106,19 @@ ImageCollection.extract <- function(ImageCollection,
         overwrite = overwrite,
         verbose = verbose
       )
-      if (is.null(extract.params)){
-        tempdata <- lapply(tempimage$RasterStacks, function(x) {
-          as.data.frame(extract(x, extract.sp_read, sp = T))
-        })
-      } else {
-        tempdata <- lapply(tempimage$RasterStacks, function(x) {
-          as.data.frame(extract(x, extract.sp_read, extract.params, sp = T))
-        }) 
-      }
+
+      # only extract from items in extract.sp that fall within the image
+      extract.sp_read_repro <- st_transform(extract.sp_read,
+                                              crs=as.character(crs(tempimage$RasterStacks[[1]])))
+      intersect_check <- st_intersects(extract.sp_read_repro, 
+                                         st_as_sf(bbox_to_SpatialPolygons(tempimage$RasterStacks[[1]])),sparse=F)
+      intersectIndices <- which(intersect_check, arr.ind = T)
+      locationsNeeded <- extract.sp_read_repro[intersectIndices[,1],]
+      
+      tempdata <- lapply(tempimage$RasterStacks, function(x) {
+        as.data.frame(extract(x, locationsNeeded, sp = T, ...))
+      })
+      
       if (length(tempdata) > 1) {
         dfimage <- join_all(tempdata)
       } else{
