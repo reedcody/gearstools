@@ -14,7 +14,9 @@ ImageCollection.filter <- function(ImageCollection,
   # browser()
   if(is.character(ImageCollection))
   {
-    if(file.exists(ImageCollection)) load(ImageCollection) else stop("ImageCollection was not found...")
+    if(file.exists(ImageCollection)) {load(ImageCollection)
+    } else {stop("ImageCollection was not found...")
+        }
   }
   
   if(!is.null(filterImageNums))
