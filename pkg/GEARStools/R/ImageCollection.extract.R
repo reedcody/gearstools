@@ -171,7 +171,7 @@ ImageCollection.extract <- function(ImageCollection,
         retrieve_metadata = F,
         retrieve_stack = retrieve_stack,
         stack_format = "RasterList",
-        decompressed_dir = ImageCollection$Images[[i]]$metadata$decompressed_dir,
+        decompressed_dir = dirname(ImageCollection$Images[[i]]$metadata$decompressed_dir),
         overwrite = overwrite,
         verbose = verbose)
       
