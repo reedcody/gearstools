@@ -26,24 +26,19 @@ Image.metadata.TM_Landsat_4_sr <- function(fname,decompressed_dir=tempdir(),retu
 			suppressWarnings(untar(fname,xml_fname,exdir=outdir,extras=extras))
 		}
 		
+		if(!file.exists(txt_fname_uncompressed))
+		{
+		  suppressWarnings(untar(fname,txt_fname,exdir=outdir,extras=extras))
+		}
+		
 	} else
 	{
 		compressed=FALSE
 		fname_files_list <- list.files(fname)
 		xml_fname_uncompressed <- file.path(fname,fname_files_list[grepl(pattern=".xml$",fname_files_list)])
+		txt_fname_uncompressed <- file.path(fname,fname_files_list[grepl(pattern="_MTL.txt$",fname_files_list)])
 	}
 	
-	if(!file.exists(txt_fname_uncompressed))
-	{
-	  suppressWarnings(untar(fname,txt_fname,exdir=outdir,extras=extras))
-	}
-	
-} else
-{
-  compressed=FALSE
-  fname_files_list <- list.files(fname)
-  txt_fname_uncompressed <- file.path(fname,fname_files_list[grepl(pattern="_MTL.txt$",fname_files_list)])
-}
 	# Read band metadata from local file, this will need to be tweaked for a package:
 	# band_raw <- read.csv("~/code/R/GEARStools/pkg/GEARStools/inst/extdata/OLI_Landsat_8_bandinfo.csv")
 	#
@@ -99,7 +94,7 @@ Image.metadata.TM_Landsat_4_sr <- function(fname,decompressed_dir=tempdir(),retu
 	
 	metadata$mask_file <- file.path(fname,fname_files_list[grepl(pattern="_pixel_qa.tif$",fname_files_list)])
 	
-	metadata$cloudiness <- (txt_raw) #Percent cloudiness not cloud mask
+	metadata$cloudiness <- txt_raw #Percent cloudiness not cloud mask
 	
 	metadata$mask_function <- function(qa)
 	{

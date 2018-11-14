@@ -8,12 +8,21 @@ ImageCollection.build <- function(fnames,drivers,decompressed_dirs,
 		buildonly,
 		verbose=F)
 {
-	fnames_df <- foreach(i=seq(fnames),.combine=rbind) %do%
-			{
-				tempfiles <- list.files(fnames[i],full.names=T)
-				tempfnames <- data.frame(fname=tempfiles,driver=drivers[i],decompressed_dir=decompressed_dirs[i],
-						stringsAsFactors=F)
-			}
+  if(drivers=="auto"){
+    fnames_df <- foreach(i=seq(fnames),.combine=rbind) %do%
+    {
+      tempfiles <- list.files(fnames[i],full.names=T)
+      tempfnames <- data.frame(fname=tempfiles,driver=drivers,decompressed_dir=decompressed_dirs[i],
+                               stringsAsFactors=F)
+    }
+  } else {
+    fnames_df <- foreach(i=seq(fnames),.combine=rbind) %do%
+    {
+      tempfiles <- list.files(fnames[i],full.names=T)
+      tempfnames <- data.frame(fname=tempfiles,driver=drivers[i],decompressed_dir=decompressed_dirs[i],
+                               stringsAsFactors=F)
+    } 
+  }
 	
 	if(verbose) message(paste0("Number of files found:",nrow(fnames_df)))
 	
@@ -32,7 +41,8 @@ ImageCollection.build <- function(fnames,drivers,decompressed_dirs,
 		setDefaultCluster(cl=cl)
 		registerDoParallel(cl)
 		
-		ImageCollection$Images <- foreach(i=seq(nrow(fnames_df)),.packages="GEARStools") %dopar%
+		ImageCollection$Images <- foreach(i=seq(nrow(fnames_df)),.packages="GEARStools"
+		                                  ) %dopar% #%do% can't use dopar without compiling GEARStools package
 				{
 					ImageMetadata <- list()
 					ImageMetadata$metadata <- Image(

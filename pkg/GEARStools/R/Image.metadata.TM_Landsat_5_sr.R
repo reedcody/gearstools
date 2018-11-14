@@ -8,42 +8,36 @@ Image.metadata.TM_Landsat_5_sr <- function(fname,decompressed_dir=tempdir(),retu
 	
 	if(grepl(pattern=".tar.gz$",x=fname))
 	{
-		if(verbose) { message("decompressing...")}
-		compressed=TRUE
-		# Extract the metadata info:
-		# tempdir <- tempdir()
-		outdir <- file.path(decompressed_dir,sub('\\.tar.gz$', '',basename(fname)))
-#			browser()
-		# QUESTION: CAN I DO WILDCARD EXTRACTIONS?
-		fname_files_list <- untar(fname,list=T)
-		xml_fname <- fname_files_list[grepl(pattern=".xml$",fname_files_list)]
-		xml_fname_uncompressed <- file.path(outdir,xml_fname)
-		txt_fname <- fname_files_list[grepl(pattern="_MTL.txt$",fname_files_list)]
-		txt_fname_uncompressed <- file.path(outdir,txt_fname)
-		
-		if(!file.exists(xml_fname_uncompressed))
-		{
-		  suppressWarnings(untar(fname,xml_fname,exdir=outdir,extras=extras))
-		}
-		
+	  if(verbose) { message("decompressing...")}
+	  compressed=TRUE
+	  # Extract the metadata info:
+	  # tempdir <- tempdir()
+	  outdir <- file.path(decompressed_dir,sub('\\.tar.gz$', '',basename(fname)))
+	  #			browser()
+	  # QUESTION: CAN I DO WILDCARD EXTRACTIONS?
+	  fname_files_list <- untar(fname,list=T)
+	  xml_fname <- fname_files_list[grepl(pattern=".xml$",fname_files_list)]
+	  xml_fname_uncompressed <- file.path(outdir,xml_fname)
+	  txt_fname <- fname_files_list[grepl(pattern="_MTL.txt$",fname_files_list)]
+	  txt_fname_uncompressed <- file.path(outdir,txt_fname)
+	  
+	  if(!file.exists(xml_fname_uncompressed)) 
+	  {
+	    suppressWarnings(untar(fname,xml_fname,exdir=outdir,extras=extras))
+	  }
+	  
+	  if(!file.exists(txt_fname_uncompressed))
+	  {
+	    suppressWarnings(untar(fname,txt_fname,exdir=outdir,extras=extras))
+	  }
+	  
 	} else
 	{
 	  compressed=FALSE
 	  fname_files_list <- list.files(fname)
 	  xml_fname_uncompressed <- file.path(fname,fname_files_list[grepl(pattern=".xml$",fname_files_list)])
+	  txt_fname_uncompressed <- file.path(fname,fname_files_list[grepl(pattern="_MTL.txt$",fname_files_list)])
 	}
-	
-	if(!file.exists(txt_fname_uncompressed))
-	{
-	  suppressWarnings(untar(fname,txt_fname,exdir=outdir,extras=extras))
-	}
-	
-} else
-{
-  compressed=FALSE
-  fname_files_list <- list.files(fname)
-  txt_fname_uncompressed <- file.path(fname,fname_files_list[grepl(pattern="_MTL.txt$",fname_files_list)])
-}
 	
 	# Read band metadata from local file, this will need to be tweaked for a package:
 	# band_raw <- read.csv("~/code/R/GEARStools/pkg/GEARStools/inst/extdata/OLI_Landsat_8_bandinfo.csv")
