@@ -1,4 +1,4 @@
-Image.metadata.Climate <- function(fname, decompressed_dir=tempdir(), verbose=F){
+Image.metadata.Climate <- function(fname, decompressed_dir=tempdir(), verbose=F, extras=NULL){
   driver = "Climate"
   metadata <- list()
   fname_unlist=unlist(strsplit(basename(fname),"_"))
