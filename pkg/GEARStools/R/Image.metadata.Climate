@@ -1,0 +1,11 @@
+Image.metadata.Climate <- function(fname, decompressed_dir=tempdir(), verbose=F){
+  driver = "Climate"
+  metadata <- list()
+  fname_unlist=unlist(strsplit(fname,"_"))
+  metadata$variable = fname_unlist[1]
+  metadata$AqDate = fname_unlist[3]
+  metadata$Cloudiness = 0
+  metadata$mask=NA
+  decompressed_dir=fname
+  return(metadata)
+}
