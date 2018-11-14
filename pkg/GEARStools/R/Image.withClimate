@@ -83,9 +83,9 @@ Image <- function(fname,driver="auto",retrieve_metadata=T,retrieve_stack=F,stack
 		if(verbose) { message("driver=TM_Landsat_4_sr")}
 		metadata <- Image.metadata.TM_Landsat_4_sr(fname=fname,decompressed_dir=decompressed_dir,extras=extras,verbose=verbose)	
 	}
-  if(driver=="CA_Climate"){
-    if(verbose) { message("driver=CA_Climate")}
-    metadata <- Image.metadata.CA_Climate(fname=fname, decompressed_dir=decompressed_dir,verbose=verbose)	
+  if(driver=="Climate"){
+    if(verbose) { message("driver=Climate")}
+    metadata <- Image.metadata.Climate(fname=fname, decompressed_dir=decompressed_dir,verbose=verbose)	
   }
 	
 	metadata$fname <- fname
