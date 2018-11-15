@@ -1,4 +1,5 @@
-
+#' @import raster sf
+#' @export
 
 Image.metadata.Climate <- function(fname, decompressed_dir=tempdir(), verbose=F, extras = NULL){
   driver = "Climate"
