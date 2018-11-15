@@ -14,7 +14,9 @@ ImageCollection.filter <- function(ImageCollection,
   # browser()
   if(is.character(ImageCollection))
   {
-    if(file.exists(ImageCollection)) load(ImageCollection) else stop("ImageCollection was not found...")
+    if(file.exists(ImageCollection)) {load(ImageCollection)
+    } else {stop("ImageCollection was not found...")
+        }
   }
   
   if(!is.null(filterImageNums))
@@ -30,7 +32,7 @@ ImageCollection.filter <- function(ImageCollection,
     if(verbose) {message("Filtering by filterBounds...")}
     if(is.character(filterBounds)){
       if(file.exists(filterBounds)){
-      filterBounds_read<-st_read(dsn=dirname(filterBounds), layer=gsub("\\.shp$|\\.kml$|\\.kmz$","",basename(filterBounds))) 
+      filterBounds_read<-st_read(dsn=dirname(filterBounds), layer=gsub("\\.shp$","",basename(filterBounds))) 
       }else{warning("filterBounds not found. File path shapefile or object of class 'sf' required")}}
     else{if(class(filterBounds)[1]=="sf"){filterBounds_read <- filterBounds
     }else{warning("filterBounds not found. File path shapefile or object of class 'sf' required")}}

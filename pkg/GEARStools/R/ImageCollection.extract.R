@@ -15,15 +15,17 @@ ImageCollection.extract <- function(ImageCollection,
                                     retrieve_stack = T, # or list of band names
                                     overwrite = F,
                                     extract.sp = NULL, # default to filterBounds if NULL, can be file path or memory object
-                                    extract.params = NULL, #list written as passed to extract  function (e.g. fun = mean, buffer = 30)
                                     extract.raster = NULL, # file path to raster
+                                    byPixel = F, # if extract.sp is line(s) or polygon(s), byPixel=T returns individual pixel values
                                     qa.mask = F, # create "Mask" column in output dataframe indicating pixel clear (T/F) based on mask function from driver
                                     # Parallel options:
                                     #parallel_engine = "rslurm",
                                     #rslurm_options = list(submit = FALSE),
                                     #job_folder = file.path(path.expand("~"), "rslurm"),
                                     #debugmode = F,
-                                    verbose = F)
+                                    verbose = F,
+                                    ... # additional arguments to pass to extract()
+                                    )
 {
   if (is.character(ImageCollection))
   {
@@ -101,19 +103,44 @@ ImageCollection.extract <- function(ImageCollection,
         retrieve_metadata = F,
         retrieve_stack = retrieve_stack,
         stack_format = "RasterList",
-        decompressed_dir = ImageCollection$Images[[i]]$metadata$decompressed_dir,
+        decompressed_dir = dirname(ImageCollection$Images[[i]]$metadata$decompressed_dir),
         overwrite = overwrite,
         verbose = verbose
       )
-      if (is.null(extract.params)){
+
+      # only extract from items in extract.sp that fall within the image
+      extract.sp_read_repro <- st_transform(extract.sp_read,
+                                              crs=as.character(crs(tempimage$RasterStacks[[1]])))
+      intersect_check <- st_intersects(extract.sp_read_repro, 
+                                         st_as_sf(bbox_to_SpatialPolygons(tempimage$RasterStacks[[1]])),sparse=F)
+      intersectIndices <- which(intersect_check, arr.ind = T)
+      locationsNeeded <- extract.sp_read_repro[intersectIndices[,1],]
+      
+      if(!byPixel){
         tempdata <- lapply(tempimage$RasterStacks, function(x) {
-          as.data.frame(extract(x, extract.sp_read, sp = T))
+          as.data.frame(extract(x, locationsNeeded, sp = T, ...))
         })
       } else {
         tempdata <- lapply(tempimage$RasterStacks, function(x) {
-          as.data.frame(extract(x, extract.sp_read, extract.params, sp = T))
-        }) 
+          pix_data <- extract(x, locationsNeeded, cellnumbers=T, ...)
+          sp_data <- st_set_geometry(locationsNeeded, NULL)
+          
+          #pix_sp_data <- data.frame()
+          #for(n in seq(length(pix_data))){
+          pix_sp_data <- foreach(n=seq(length(pix_data)), .combine = rbind) %do% {
+            xy_coords <- xyFromCell(object=x, cell=pix_data[[n]][,"cell"])
+            
+            sp_data_rep <- sp_data[rep(n, nrow(xy_coords)), ]
+            rownames(sp_data_rep) <- c()
+            pix_sp_feature <- cbind(sp_data_rep, pix_data[[n]], xy_coords)
+            
+            #pix_sp_data <- rbind(pix_sp_data, pix_sp_feature)
+          }
+          return(pix_sp_data)
+        })
       }
+
+      
       if (length(tempdata) > 1) {
         dfimage <- join_all(tempdata)
       } else{
@@ -144,7 +171,7 @@ ImageCollection.extract <- function(ImageCollection,
         retrieve_metadata = F,
         retrieve_stack = retrieve_stack,
         stack_format = "RasterList",
-        decompressed_dir = ImageCollection$Images[[i]]$metadata$decompressed_dir,
+        decompressed_dir = dirname(ImageCollection$Images[[i]]$metadata$decompressed_dir),
         overwrite = overwrite,
         verbose = verbose)
       
