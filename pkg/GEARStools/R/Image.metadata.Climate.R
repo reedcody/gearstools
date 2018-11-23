@@ -9,7 +9,7 @@ Image.metadata.Climate <- function(fname, decompressed_dir=tempdir(), verbose=F,
   metadata$driver=driver
   metadata$basename=basename(fname)
   metadata$variable = fname_unlist[1]
-  metadata$acquisition_datetime = gsub("\\..*","",fname_unlist[2])
+  metadata$acquisition_datetime = gsub("\\..*","",fname_unlist[3])
   #Bounding box
   metadata$proj <- "+proj=aea +lat_1=30 +lat_2=50 +lat_0=40 +lon_0=-125 +x_0=0 +y_0=0+datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0"
   raster_file<-raster(fname)
