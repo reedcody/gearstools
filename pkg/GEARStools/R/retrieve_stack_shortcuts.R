@@ -59,8 +59,13 @@ retrieve_stack_shortcuts <- function(retrieve_stack,driver)
 			)
 		}
 	}
-	
-	
-	
+	if(driver=="Climate")
+	{
+		retrieve_stack_return = list(
+			sr=c(
+				Variable="_.tif$")
+		
+			)
+	}  
 	return(retrieve_stack_return)
 }
