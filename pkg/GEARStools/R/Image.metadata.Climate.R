@@ -1,7 +1,7 @@
 #' @import raster sf
 #' @export
 
-Image.metadata.Climate <- function(fname, decompressed_dir=tempdir(), verbose=F, extras = NULL){
+Image.metadata.Climate2 <- function(fname, decompressed_dir=tempdir(), verbose=F, extras = NULL){
   driver = "Climate"
   fname_files_list <- list.files(fname)
   fname_unlist=unlist(strsplit(basename(fname),"_"))
@@ -9,22 +9,12 @@ Image.metadata.Climate <- function(fname, decompressed_dir=tempdir(), verbose=F,
   metadata$driver=driver
   metadata$basename=basename(fname)
   metadata$variable = fname_unlist[1]
-  metadata$acquisition_datetime = gsub("\\..*","",fname_unlist[3])
-  #Bounding box
-  metadata$proj <- "+proj=aea +lat_1=30 +lat_2=50 +lat_0=40 +lon_0=-125 +x_0=0 +y_0=0+datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0"
+  date = as.numeric(gsub("\\..*","",fname_unlist[3]))
+  metadata$acquisition_datetime = as.Date(sprintf("%08d", date), format = "%Y%m%d")
   raster_file<-raster(fname)
-  xmin<-raster_file@extent[1]
-  xmax<-raster_file@extent[2]
-  ymin<-raster_file@extent[3]
-  ymax<-raster_file@extent[4]
-  bbox_coords <- matrix(c(
-    xmin,ymin,
-    xmax,ymin,
-    xmax,ymax,
-    xmin,ymax,
-    xmin,ymin),
-    ncol=2,byrow=T)
-  metadata$bbox <- st_sf(st_sfc(st_polygon(list(bbox_coords)),crs=metadata$proj))
+  raster_proj<-proj4string(raster_file)
+  raster_bbox<-st_as_sf(bbox_to_SpatialPolygons(raster_file))
+  metadata$bbox<-st_transform(raster_bbox,crs="+proj=latlong +datum=WGS84")
   metadata$mask_file=NA
   metadata$cloudiness = 0
   metadata$mask_function=NA
