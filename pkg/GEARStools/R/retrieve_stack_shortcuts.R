@@ -30,6 +30,13 @@ retrieve_stack_shortcuts <- function(retrieve_stack,driver)
 					qa=c(qa="_pixel_qa.tif$"))
 		}
 	}
+		if(driver=="Climate")
+	{
+		retrieve_stack_return = list(
+			sr=(
+				Variable="_.tif$")
+			)
+	} 
 	
 	if(retrieve_stack=="LANDSAT_SR_NOMASK")
 	{
@@ -59,8 +66,6 @@ retrieve_stack_shortcuts <- function(retrieve_stack,driver)
 			)
 		}
 	}
-	
-	
-	
+ 
 	return(retrieve_stack_return)
 }
