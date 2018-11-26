@@ -1,7 +1,7 @@
 #' @import raster sf
 #' @export
 
-Image.metadata.Climate2 <- function(fname, decompressed_dir=tempdir(), verbose=F, extras = NULL){
+Image.metadata.Climate <- function(fname, decompressed_dir=tempdir(), verbose=F, extras = NULL){
   driver = "Climate"
   fname_files_list <- list.files(fname)
   fname_unlist=unlist(strsplit(basename(fname),"_"))
